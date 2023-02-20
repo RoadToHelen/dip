@@ -2,6 +2,7 @@ import random
 from random import randrange
 import datetime
 import requests
+from pprint import pprint
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 import json
@@ -17,34 +18,66 @@ except FileNotFoundError:
     user_token = input('user_token: ')
 
 
-vk = vk_api.VkApi(token=group_token)
-vk2 = vk_api.VkApi(token=user_token)
-longpoll = VkLongPoll(vk)
+class VkBot:
+    def __init__(self):
+        self.vk = vk_api.VkApi(token=group_token)
+        self.vk2 = vk_api.VkApi(token=user_token)
+        self.longpoll = VkLongPoll(self.vk)
+
+    def send_some_msg(self, user_id, some_text):
+        self.vk.method('messages.send', {'user_id': user_id, 'message': some_text, 'random_id': randrange(10**7)})
 
 
-def send_some_msg(user_id, some_text):
-    vk.method('messages.send', {'user_id': user_id, 'message': some_text, 'random_id': randrange(10**7)})
+VkBot = VkBot()
+
+
+# class VkUser:
+#     url = 'https://api.vk.com/method/'
+#
+#     def __init__(self, user_token, user_id, version):
+#         self.params = {'access_token': user_token,
+#                        'user_ids': user_id,
+#                        'v': version
+#                        }
+
 
 def get_user_info(user_id):
-    vk.method('users.get', {'user_ids': user_id, 'v': '5.131'})
+    param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'}
+    method = 'users.get'
+    rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
+    response = rec.json()
+    dict_user_info = response['response']
+    pprint(dict_user_info)
 
 
+def get_user_name(user_id):
+    param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'}
+    method = 'users.get'
+    rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
+    response = rec.json()
+    dict_user_info = response['response']
+    pprint(dict_user_info)
+    try:
+        for i in dict_user_info:
+            for key, value in i.items():
+                first_name = i.get('first_name')
+                return first_name
+    except KeyError:
+        VkBot.send_some_msg(user_id, 'Ошибка')
 
 
-
-for event in longpoll.listen():
+for event in VkBot.longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me:
         msg = event.text.lower()
         request = event.text.lower()
         user_id = str(event.user_id)
         if msg == 'hi':
-            send_some_msg(user_id, f'Hi, {user_id}, if you want to pick up a pair - type  "start search"')
+            VkBot.send_some_msg(user_id, f'Hi, {get_user_name(user_id)}, if you want to pick up a pair - type  "start search"')
         elif request == 'привет':
-            send_some_msg(user_id, f'Привет, {user_id}! Если хочешь подобрать пару - набери "начать поиск"')
+            VkBot.send_some_msg(user_id, f'Привет, {get_user_name(user_id)}! Если хочешь подобрать пару - набери "начать поиск"')
         elif request == 'start search':
-            send_some_msg(user_id, f'Start searching')
+            VkBot.send_some_msg(user_id, f'Start searching')
         elif request == 'начать поиск':
-            send_some_msg(user_id, f'{user_id}, начинаю поиск')
-
+            VkBot.send_some_msg(user_id, f'{get_user_name(user_id)}, начинаю поиск')
         else:
-            send_some_msg(user_id, f'{user_id}, твое сообщение не понятно')
+            VkBot.send_some_msg(user_id, f'{get_user_name(user_id)}, твое сообщение не понятно')
