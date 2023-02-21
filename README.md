@@ -3,9 +3,7 @@
 Внести токен группы в group_token.txt
 
 requirements.txt - версии библиотек, используемых в проекте
-Документация:
-https://pip.pypa.io/en/stable/user_guide/#requirements-files
-https://pip.pypa.io/en/stable/cli/pip_install/#requirements-file-format
+Документация:https://learn.microsoft.com/ru-ru/VisualStudio/python/managing-required-packages-with-requirements-txt?view=vs-2022
 
 **Входные данные**
 
