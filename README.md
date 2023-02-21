@@ -11,7 +11,7 @@ https://pip.pypa.io/en/stable/cli/pip_install/#requirements-file-format
 
 id пользователя в ВК, для которого мы ищем пару.
 
-# Информацию по пользователю получаем методом VK API users.get https://dev.vk.com/method/users.get
+Информацию по пользователю получаем методом VK API users.get https://dev.vk.com/method/users.get
 
 Все слышали про известное приложение для знакомств - Tinder. Приложение предоставляет простой интерфейс для выбора понравившегося человека. Сейчас в Google Play более 100 миллионов установок.
 
