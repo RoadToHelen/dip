@@ -6,7 +6,7 @@ from pprint import pprint
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 import json
-# from database import create_db
+# from database import create_db, create_users
 
 try:
     with open('group_token.txt', 'r') as file:
@@ -16,7 +16,6 @@ try:
 except FileNotFoundError:
     group_token = input('group_token: ')
     user_token = input('user_token: ')
-
 
 class VkBot:
     def __init__(self):
@@ -53,10 +52,18 @@ class VkBot:
                     first_name = i.get('first_name')
                     last_name = i.get('last_name')
                     bdate = i.get('bdate')
-                    city = i.get('city')
                     sex = i.get('sex')
+                    # if 'sex' in key:
+                    #     s_dict = {'1': 'female', '2': 'male', '0': 'none'}
+                    #     sex = key.get('sex')
+                    #     sex_name = str(sex.get('sex_name'))
                     relation = i.get('relation')
-                    user_dict = {'first_name': first_name, 'last_name': last_name, 'bdate': bdate, 'city': city, 'sex': sex, 'relation': relation}
+                    city = i.get('city')
+                    if 'city' in key:
+                        city = key.get('city')
+                        title = str(city.get('title'))
+                        return title
+                    user_dict = {'first_name': first_name, 'last_name': last_name, 'bdate': bdate, 'city': str(city.get('title')), 'sex': sex, 'relation': relation}
                     return user_dict
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
@@ -78,5 +85,6 @@ for event in VkBot.longpoll.listen():
             VkBot.send_some_msg(user_id, f'Start searching for {VkBot.get_user_info(user_id)}')
         elif request == 'начать поиск':
             VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, начинаю поиск по параметрам {VkBot.get_user_info(user_id)}')
+            # create_db
         else:
             VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, твое сообщение не понятно')
