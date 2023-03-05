@@ -73,24 +73,8 @@ class VkBot:
         try:
             for i in dict_user_info:
                 for key, value in i.items():
-                    sex = i.get('sex')
-                    if sex == 1:
-                        sex_name = 'мужчину'
-                    elif sex == 2:
-                        sex_name = 'женщину'
-                    else:
-                        VkBot.send_some_msg(user_id, 'Ваш пол не задан, кого ищем (мужчину/женщину): ')
-                        for event in self.longpoll.listen():
-                            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-                                sex_name = event.text
-                for key, value in i.items():
                     bdate = i.get('bdate')
                     bdate_list = bdate.split('.')
-                    # sex_list = {1: 'female', 2: 'male', 0: 'none'}
-                    # for sex, sex_name in sex_list.items():
-                    #     if sex == key:
-                    #         return value
-
                     if len(bdate_list) == 3:
                         bday = int(bdate_list[0])
                         bmonth = int(bdate_list[1])
@@ -119,10 +103,22 @@ class VkBot:
                                 if month_today > bmonth:
                                     age = year_today - byear
                                 elif (month_today == bmonth and bday > day_today) or (month_today == bmonth and bday > day_today):
-                                    age = year_today - byear - 1
+                                    age = year_today - byear
                                 else:
                                     age = year_today - byear - 1
-                for key, value in i.items():
+                                    print(age)
+                    else:
+                        self.send_some_msg(user_id, 'Ошибка')
+                    sex = i.get('sex')
+                    if sex == 1:
+                        sex_name = 'мужчину'
+                    elif sex == 2:
+                        sex_name = 'женщину'
+                    else:
+                        VkBot.send_some_msg(user_id, 'Ваш пол не задан, кого ищем (мужчину/женщину): ')
+                        for event in self.longpoll.listen():
+                            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                                sex_name = event.text
                     city = i.get('city')
                     if 'city' in key:
                         city = key.get('city')
