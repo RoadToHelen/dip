@@ -76,10 +76,8 @@ class VkBot:
                     sex = i.get('sex')
                     if sex == 1:
                         sex_name = 'мужчину'
-                        print(sex_name)
                     elif sex == 2:
                         sex_name = 'женщину'
-                        print(sex_name)
                     else:
                         VkBot.send_some_msg(user_id, 'Ваш пол не задан, кого ищем (мужчину/женщину): ')
                         for event in self.longpoll.listen():
@@ -88,7 +86,6 @@ class VkBot:
                 for key, value in i.items():
                     bdate = i.get('bdate')
                     bdate_list = bdate.split('.')
-                    print(bdate_list)
                     # sex_list = {1: 'female', 2: 'male', 0: 'none'}
                     # for sex, sex_name in sex_list.items():
                     #     if sex == key:
@@ -103,13 +100,10 @@ class VkBot:
                         year_today = int(datetime.date.today().year)
                         if month_today > bmonth:
                             age = year_today - byear
-                            print(age)
                         elif (month_today == bmonth and bday > day_today) or (month_today == bmonth and bday > day_today):
                             age = year_today - byear
-                            print(age)
                         else:
                             age = year_today - byear - 1
-                            print(age)
                     elif len(bdate_list) == 2 or None:
                         VkBot.send_some_msg(user_id, 'Введите свою дату рождения в формате дд.мм.гггг: ')
                         for event in self.longpoll.listen():
@@ -124,7 +118,6 @@ class VkBot:
                                 year_today = int(datetime.date.today().year)
                                 if month_today > bmonth:
                                     age = year_today - byear
-                                    print(age)
                                 elif (month_today == bmonth and bday > day_today) or (month_today == bmonth and bday > day_today):
                                     age = year_today - byear - 1
                                 else:
@@ -136,8 +129,8 @@ class VkBot:
                         title = str(city.get('title'))
                         return title
                     dating_user_dict = {'age from': (age-5), 'age to': (age+5),'city': str(city.get('title')), 'sex': sex_name}
-                    return dating_user_dict
-                # return f'ищем {sex_name} от {age-5} до {age+5} лет из города {title}?'
+                    # return dating_user_dict
+                    return f"ищем {dating_user_dict['sex']} от {dating_user_dict['age from']} до {dating_user_dict['age to']} лет из города {dating_user_dict['city']}?"
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
