@@ -132,16 +132,35 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
+    def get_daiting_sex(self, user_id):
+        param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'sex', 'v': '5.131'}
+        method = 'users.get'
+        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
+        response = rec.json()
+        dict_user_info = response['response']
+        try:
+            for i in dict_user_info:
+                for key, value in i.items():
+                    sex = i.get('sex')
+                    if sex == 1:
+                        find = 2
+                        return find
+                    elif sex == 2:
+                        find = 1
+                        return find
+        except KeyError:
+            self.send_some_msg(user_id, 'Ошибка')
+
     def get_daiting_user(self, user_id):
         param = {'access_token': user_token, 'age_from': 18, 'age_to': 65, 'fields': 'bdate, sex, city, relation', 'count': 10, 'v': '5.131'}
         method = 'users.search'
         rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
         response = rec.json()
         daiting_user = response['response']
-        # du_list = daiting_user['items']
+        du_list = daiting_user['items']
         # pprint(du_list)
         try:
-            for i in daiting_user:
+            for i in du_list:
                 for key, value in i.items():
                     id = i.get('id')
                     first_name = i.get('first_name')
@@ -155,7 +174,7 @@ class VkBot:
                     # if 'city' in key:
                     #     city = key.get('city')
                     #     title = str(city.get('title'))
-                    if is_closed == False and len(bdate_list) == 3 and (relation == 1 or relation == 6):
+                    if is_closed == False and len(bdate_list) == 3 and (relation == 1 or relation == 6) and sex == self.get_daiting_sex(user_id):#Почему выдает ошибку?
                         # self.get_daiting_sex(user_id):
                         dating_dict = {'id': id, 'first_name': first_name, 'last_name': last_name}
                         # 'city': str(city.get('title'))
