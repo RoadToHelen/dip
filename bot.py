@@ -106,7 +106,8 @@ class VkBot:
                                     age = year_today - byear
                                 else:
                                     age = year_today - byear - 1
-                                    print(age)#Почему выходит из ветки?
+                                    print(age)
+                                    return age #Почему выходит из ветки?
                     else:
                         self.send_some_msg(user_id, 'Ошибка')
                     sex = i.get('sex')
