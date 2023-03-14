@@ -106,8 +106,9 @@ class VkBot:
                                     age = year_today - byear
                                 else:
                                     age = year_today - byear - 1
+                                    # return age
                                     print(age)
-                                    return age #Почему выходит из ветки?
+                                     #Почему выходит из ветки?
                     else:
                         self.send_some_msg(user_id, 'Ошибка')
                     sex = i.get('sex')
@@ -175,7 +176,7 @@ class VkBot:
                     # if 'city' in key:
                     #     city = key.get('city')
                     #     title = str(city.get('title'))
-                    if is_closed == False and len(bdate_list) == 3 and (relation == 1 or relation == 6) and sex == self.get_daiting_sex(user_id):#Почему выдает ошибку?
+                    if is_closed == False and len(bdate_list) == 3 and (relation == 1 or relation == 6):#Почему выдает ошибку?
                         # self.get_daiting_sex(user_id):
                         dating_dict = {'id': id, 'first_name': first_name, 'last_name': last_name}
                         # 'city': str(city.get('title'))
@@ -183,13 +184,25 @@ class VkBot:
                         return f'{first_name} {last_name}'
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
+    def b (self):
+        for event in VkBot.longpoll.listen():
+            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                request = event.text.lower()
+                user_id = str(event.user_id)
+                if request == 'да':
+                    VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, {VkBot.get_daiting_user(user_id)}')
+                    # self.get_daiting_user(user_id)
+                elif request == 'нет':
+                    VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, очень жаль, до новых встреч!')
+    
+
+
 
 VkBot = VkBot()
 
 
 for event in VkBot.longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-        msg = event.text.lower()
         request = event.text.lower()
         user_id = str(event.user_id)
         if request == 'привет':
@@ -197,11 +210,13 @@ for event in VkBot.longpoll.listen():
         # elif request == 'start search':
         #     VkBot.send_some_msg(user_id, f'Start searching for {VkBot.get_user_info(user_id)}')
         elif request == 'начать поиск':
-            VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, {VkBot.get_daiting_user_info(user_id)}')
-        elif request == 'да':
-            VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, {VkBot.get_daiting_user(user_id)}')
-        elif request == 'нет':
-            VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, очень жаль, до новых встреч!')
+            VkBot.b()
+            # VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, {VkBot.get_daiting_user_info(user_id)}')
+        elif request == 'пока':
+            
+            
+
         #     # create_db
         else:
             VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, твое сообщение не понятно') #pprint не влияет на выдачу в ВК
+
