@@ -60,7 +60,7 @@ class VkBot:
                         title = str(city.get('title'))
                         return title
                     user_dict = {'first_name': first_name, 'last_name': last_name, 'bdate': bdate, 'city': str(city.get('title')), 'sex': sex, 'relation': relation}
-                    return user_dict
+                    return self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, {user_dict}')
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
@@ -75,7 +75,9 @@ class VkBot:
                 for key, value in i.items():
                     bdate = i.get('bdate')
                     bdate_list = bdate.split('.')
-                    if len(bdate_list) == 3:
+                    if len(bdate_list) == 2 or None:
+                        age = self.get_bdate(user_id)
+                    elif len(bdate_list) == 3:
                         bday = int(bdate_list[0])
                         bmonth = int(bdate_list[1])
                         byear = int(bdate_list[2])
@@ -88,27 +90,6 @@ class VkBot:
                             age = year_today - byear
                         else:
                             age = year_today - byear - 1
-                    elif len(bdate_list) == 2 or None:
-                        self.send_some_msg(user_id, 'Введите свою дату рождения в формате дд.мм.гггг: ')
-                        for event in self.longpoll.listen():
-                            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-                                bdate = event.text
-                                bdate_list = bdate.split('.')
-                                bday = int(bdate_list[0])
-                                bmonth = int(bdate_list[1])
-                                byear = int(bdate_list[2])
-                                day_today = int(datetime.date.today().day)
-                                month_today = int(datetime.date.today().month)
-                                year_today = int(datetime.date.today().year)
-                                if month_today > bmonth:
-                                    age = year_today - byear
-                                elif (month_today == bmonth and bday > day_today) or (month_today == bmonth and bday > day_today):
-                                    age = year_today - byear
-                                else:
-                                    age = year_today - byear - 1
-                                    # return age
-                                    print(age)
-                                     #Почему выходит из ветки?
                     else:
                         self.send_some_msg(user_id, 'Ошибка')
                     sex = i.get('sex')
@@ -130,9 +111,30 @@ class VkBot:
                         return title
                     dating_user_dict = {'age from': (age-5), 'age to': (age+5),'city': str(city.get('title')), 'sex': sex_name, 'sex_find': sex_find}
                     # return dating_user_dict
-                    return f"ищем {dating_user_dict['sex']} от {dating_user_dict['age from']} до {dating_user_dict['age to']} лет из города {dating_user_dict['city']}? Если параметры подходят - набери Да"
+                    return self.send_some_msg(user_id, f"{self.get_user_name(user_id)}, ищем {dating_user_dict['sex']} от {dating_user_dict['age from']} до {dating_user_dict['age to']} лет из города {dating_user_dict['city']}?")
+                        # f"ищем {dating_user_dict['sex']} от {dating_user_dict['age from']} до {dating_user_dict['age to']} лет из города {dating_user_dict['city']}? Если параметры подходят - набери Да"
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
+
+    def get_bdate(self, user_id):
+        self.send_some_msg(user_id, 'Введите свою дату рождения в формате дд.мм.гггг: ')
+        for event in self.longpoll.listen():
+            if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                bdate = event.text
+                bdate_list = bdate.split('.')
+                bday = int(bdate_list[0])
+                bmonth = int(bdate_list[1])
+                byear = int(bdate_list[2])
+                day_today = int(datetime.date.today().day)
+                month_today = int(datetime.date.today().month)
+                year_today = int(datetime.date.today().year)
+                if month_today > bmonth:
+                    age = year_today - byear
+                elif (month_today == bmonth and bday > day_today) or (month_today == bmonth and bday > day_today):
+                    age = year_today - byear
+                else:
+                    age = year_today - byear - 1
+                    return age
 
     def get_daiting_sex(self, user_id):
         param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'sex', 'v': '5.131'}
@@ -171,7 +173,7 @@ class VkBot:
                     bdate = i.get('bdate')
                     bdate_list = bdate.split('.')
                     relation = i.get('relation')
-                    sex = i.get('sex')
+                    sex = self.get_daiting_sex(user_id)
                     # city = i.get('city')
                     # if 'city' in key:
                     #     city = key.get('city')
@@ -184,19 +186,34 @@ class VkBot:
                         return f'{first_name} {last_name}'
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
+
+    # def start_search(self):
+    #     for event in VkBot.longpoll.listen():
+    #         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+    #             request = event.text.lower()
+    #             user_id = str(event.user_id)
+    #             if request == 'да':
+    #                 self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, {self.get_user_info(user_id)}')
+    #             else:
+    #                 self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, твое сообщение не понятно')
+
+    def hi(self, user_id):
+        VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_user_name(user_id)}! Если хочешь подобрать пару - набери "начать поиск"')
+
+    def bye(self, user_id):
+        VkBot.send_some_msg(user_id, f'Пока, {VkBot.get_user_name(user_id)}! До новых встреч!')
+
     def b (self):
         for event in VkBot.longpoll.listen():
             if event.type == VkEventType.MESSAGE_NEW and event.to_me:
                 request = event.text.lower()
                 user_id = str(event.user_id)
-                if request == 'да':
-                    VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, {VkBot.get_daiting_user(user_id)}')
-                    # self.get_daiting_user(user_id)
-                elif request == 'нет':
-                    VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, очень жаль, до новых встреч!')
-    
-
-
+                # if request == 'да':
+                #     VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, Начинаю поиск')
+                #                                  # f'{VkBot.get_daiting_user(user_id)}')
+                #     # self.get_daiting_user(user_id)
+                # elif request == 'нет':
+                #     VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, очень жаль, до новых встреч!')
 
 VkBot = VkBot()
 
@@ -206,17 +223,15 @@ for event in VkBot.longpoll.listen():
         request = event.text.lower()
         user_id = str(event.user_id)
         if request == 'привет':
-            VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_user_name(user_id)}! Если хочешь подобрать пару - набери "начать поиск"')
-        # elif request == 'start search':
-        #     VkBot.send_some_msg(user_id, f'Start searching for {VkBot.get_user_info(user_id)}')
+            VkBot.hi(user_id)
         elif request == 'начать поиск':
-            VkBot.b()
-            # VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, {VkBot.get_daiting_user_info(user_id)}')
+            # VkBot.get_user_info(user_id)
+            VkBot.get_daiting_user_info(user_id)
+        elif request == 'да':
+            VkBot.get_daiting_user(user_id)
+        elif request == 'нет':
+            VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, {VkBot.get_daiting_user_info(user_id)}')
         elif request == 'пока':
-            
-            
-
-        #     # create_db
+            VkBot.bye(user_id)
         else:
-            VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, твое сообщение не понятно') #pprint не влияет на выдачу в ВК
-
+            VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, твое сообщение мне не понятно, набери новое, пожалуйста.') #pprint не влияет на выдачу в ВК
