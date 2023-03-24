@@ -15,72 +15,44 @@ def create_db():
         port='5432'
     )
     initial_connection.close()
-    print('database neto was created')
+    print('БД neto создана')
 
 
-# connection = psycopg2.connect(
-#     database='neto',
-#     user='postgres',
-#     password='12345',
-#     host='localhost',
-#     port='5432'
-# )
+connection = psycopg2.connect(
+    host='localhost',
+    port='5432',
+    user='postgres',
+    database='neto',
+    password='12345'
+)
 
 connection.autocommit = True
-
 
 def create_users():
     with connection.cursor() as cursor:
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS users(
-        user_id INTEGER(9) PRIMARY KEY,
+        vk_id VARCHAR(9) PRIMARY KEY,
         first_name VARCHAR(20) NOT NULL,
         last_name VARCHAR(20),
-        bdate VARCHAR(10), NOT NULL,
-        city_id INTEGER(9) NOT NULL,
-        relation INTEGER(1) NOT NULL
+        vk_link VARCHAR(30) NOT NULL
         );
     ''')
-    print('TABLE users was created')
+    print('Таблица users создана')
 
-
-def create_dating_users():
+def insert_users(vk_id, first_name, last_name, vk_link):
     with connection.cursor() as cursor:
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS dating_users(
-        id SERIAL PRIMARY KEY,
-        d_user_id INTEGER(9) NOT NULL,
-        user_id INTEGER(9) NOT NULL
-        );
-    ''')
-
-
-def create_compilation():
-    with connection.cursor() as cursor:
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS compilation (
-        user_id INTEGER(9) NOT NULL REFERENCES users(user_id),
-        d_user_id INTEGER(9) NOT NULL REFERENCES dating_users(user_id),
-        CONSTRAINT pk PRIMARY KEY (user_id, d_user_id
-        );
-    ''')
-
-
-def insert_users(user_id, first_name, last_name, ):
-    with connection.cursor() as cursor:
-        cursor.execute('''
-        INSERT INTO users(user_id, first_name, last_name, vk_link) 
+        INSERT INTO users(vk_id, first_name, last_name, vk_link)
     VALUES
-        ({user_id}, {first_name}, {last_name}, {vk_link}
+        ('{vk_id}', '{first_name}', '{last_name}', '{vk_link}'
         );
     ''')
 
-
-def insert_dating_users(du_vk_id, user_id):
+def drop_users():
     with connection.cursor() as cursor:
         cursor.execute('''
-        INSERT INTO dating_users(du_vk_id, user_id) 
-    VALUES
-        ({du_vk_id}, {user_id}
-        );
-        ''')
+        DROP TABLE IF EXISTS users;
+        '''
+        )
+        print('Таблица users удалена')
