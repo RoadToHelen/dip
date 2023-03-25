@@ -24,8 +24,8 @@ class VkBot:
         self.vk2 = vk_api.VkApi(token=user_token)
         self.longpoll = VkLongPoll(self.vk)
 
-    def send_some_msg(self, user_id, some_text):
-        self.vk.method('messages.send', {'user_id': user_id, 'message': some_text, 'random_id': randrange(10**7)})
+    def send_some_msg(self, user_id, some_text, attachment=None):
+        self.vk.method('messages.send', {'user_id': user_id, 'message': some_text, 'random_id': randrange(10**7), 'attachment': attachment})
 
     def get_user_name(self, user_id):
         param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'}
