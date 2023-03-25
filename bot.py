@@ -73,7 +73,7 @@ class VkBot:
 #         return info
 #
 # if __name__ == '__main__':
-#     tools = VkTools(group_token)
+#     tools = VkBot(access_token)
 #     print(tools.get_profile_info(user_id))
 
     def get_daiting_user_info(self, user_id):
@@ -219,7 +219,7 @@ class VkBot:
     def get_daiting_user(self, user_id):
         param = {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6,
                  'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
-                 'has_photo': 1, 'offset': 0,
+                 'has_photo': 1, 'offset': 1,
                  'fields': 'bdate, sex, city, relation', 'count': 10, 'v': '5.131'}
         method = 'users.search'
         rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
@@ -247,13 +247,13 @@ class VkBot:
                         # select_users()
                         # for vk_id in select_users[items]
                         print(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-                        insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+                    insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
                     return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
     def get_photos(self, user_id):
-        param = {'access_token': user_token, 'adbum_id': 'profile', 'owner_id': user_id, 'extended': 1,
+        param = {'access_token': user_token, 'album_id': 'profile', 'owner_id': user_id, 'extended': 1,
                   'v': '5.131'}
         method = 'photos.get'
         rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
@@ -274,7 +274,32 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
-    # def photos_get(self, user_id):
+    def get_photos1(self, user_id):
+        photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': user_id, 'extended': 1,
+                     'v': '5.131'})
+        try:
+            photos = photos['items']
+            pprint(photos)
+
+        except KeyError:
+            self.send_some_msg(user_id, 'Ошибка')
+
+        # result = []
+        # for num, photo in enumerate(photos):
+        #     result.append({'owner_id': photo['owner_id'],
+        #                    'id': photo['id']
+        #                    })
+        #     if num == 3:
+        #         break
+        # return result
+        # pprint(result)
+
+# if __name__ == '__main__':
+#     tools = VkBot(access_token)
+#     photos = tools.photos_get(user_id)
+#     print(photos)
+
+            # def photos_get(self, user_id):
     #     photos = self.vk2.method('photos.get', {'album_id': 'profile', 'owner_id': user_id})
     #     try:
     #         photos = photos['items']
@@ -364,7 +389,7 @@ for event in VkBot.longpoll.listen():
             VkBot.get_daiting_user_info(user_id)
         elif request == 'да':
             # VkBot.get_photos(user_id)
-            VkBot.get_daiting_user(user_id)
+            VkBot.get_photos1(user_id)
         elif request == 'пока':
             VkBot.bye(user_id)
         elif request == 'продолжить':
