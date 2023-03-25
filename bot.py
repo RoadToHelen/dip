@@ -5,6 +5,7 @@ import requests
 from pprint import pprint
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
+from vk_api.exceptions import ApiError
 import json
 from database import create_db, create_users, insert_users, drop_users
 
@@ -266,12 +267,24 @@ class VkBot:
     #                 self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, {self.get_user_info(user_id)}')
     #             else:
     #                 self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, твое сообщение не понятно')
-    # def hi(self, user_id):
-    #     VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_user_name(user_id)}! Если хочешь подобрать пару - набери "начать поиск"')
-    #
-    # def bye(self, user_id):
-    #     VkBot.send_some_msg(user_id, f'Пока, {VkBot.get_user_name(user_id)}! До новых встреч!')
-    #
+    def hi(self, user_id):
+        try:
+            VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_user_name(user_id)}! Если хочешь подобрать пару - набери "начать поиск"')
+        except KeyError:
+            self.send_some_msg(user_id, 'Ошибка')
+
+    def unclear(self, user_id):
+        try:
+            VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, твое сообщение мне не понятно, набери новое, пожалуйста.')
+        except KeyError:
+            self.send_some_msg(user_id, 'Ошибка')
+
+    def bye(self, user_id):
+        try:
+            VkBot.send_some_msg(user_id, f'Пока, {VkBot.get_user_name(user_id)}! До новых встреч!')
+        except KeyError:
+            self.send_some_msg(user_id, 'Ошибка')
+
     # def b (self):
     #     for event in VkBot.longpoll.listen():
     #         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
@@ -299,9 +312,9 @@ for event in VkBot.longpoll.listen():
         elif request == 'да':
             VkBot.get_photos(user_id)
             # VkBot.get_daiting_users(user_id)
-        elif request == 'нет':
-            VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, {VkBot.get_daiting_user_info(user_id)}')
-        elif request == 'пока':
+        elif request == 'нет' or 'пока':
             VkBot.bye(user_id)
+        elif request == 'продолжить':
+            pass
         else:
-            VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, твое сообщение мне не понятно, набери новое, пожалуйста.') #pprint не влияет на выдачу в ВК
+            VkBot.unclear(user_id)
