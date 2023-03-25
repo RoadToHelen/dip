@@ -213,9 +213,9 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
-    def get_daiting_user(self, user_id):
-        param = {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6, 'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0, 'has_photo': 1,
-                 'fields': 'bdate, sex, city, relation', 'count': 10, 'v': '5.131'}
+        def get_daiting_user(self, user_id, offset = 3):
+        param = {'access_token': user_token, 'is_closed': False, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6, 'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0, 'has_photo': 1,
+                 'fields': 'bdate, sex, city, relation', 'count': 10, 'offset': offset, 'v': '5.131'}
         method = 'users.search'
         rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
         response = rec.json()
@@ -231,20 +231,18 @@ class VkBot:
                     is_closed = i.get('is_closed')
                     bdate = i.get('bdate')
                     city = i.get('city')
-                    if 'city' in key:
-                        city = key.get('city')
-                        title = str(city.get('title'))
-                        return title
-                    elif is_closed == False:
-                        dating_dict = {'id': vk_id, 'first_name': first_name, 'last_name': last_name, 'city': str(city.get('title')), 'bdate': bdate}
+                    if city == self.get_city(user_id):
+                        dating_dict = {'id': vk_id, 'first_name': first_name, 'last_name': last_name, 'bdate': bdate}
                         pprint(dating_dict)
                         # drop_db_users()
-                        # create_db()
+                        create_db()
                         # drop_users()
-                        # create_users()
-                        # insert_users(vk_id, first_name, last_name)
-                    return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
-
+                        create_users()
+                        # select_users()
+                        # print(select_users())
+                        # if vk_id not in select_users():
+                        #     insert_users(vk_id, first_name, last_name)
+                        return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']}")
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
