@@ -42,7 +42,7 @@ def insert_users(vk_id, first_name, last_name):
             cursor.execute('''
             INSERT INTO users(vk_id, first_name, last_name)
         VALUES
-            ('{vk_id}', '{first_name}', '{last_name}'
+            ('vk_id', 'first_name', 'last_name'
             );
         ''')
         print('user добавлен в таблицу')
@@ -53,8 +53,8 @@ def select_users():
     try:
         with connection.cursor() as cursor:
             cursor.execute('''SELECT * FROM users''')
-            for i in cursor:
-                print(f'{i[0]} - {i[1]} - {i[2]}')
+            # for i in cursor:
+            print(cursor.fetchone())
     except KeyError:
         return
 
