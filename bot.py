@@ -7,7 +7,7 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.exceptions import ApiError
 import json
-from database import create_db, create_users, insert_users, drop_users
+from database import create_db, create_users, insert_users, drop_users, drop_db_users
 
 try:
     with open('group_token.txt', 'r') as file:
@@ -213,9 +213,8 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
-
-    def get_daiting_users(self, user_id):
-        param = {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6, 'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'is_closed': False, 'friend_status': 0, 'has_photo': 1,
+    def get_daiting_user(self, user_id):
+        param = {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6, 'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0, 'has_photo': 1,
                  'fields': 'bdate, sex, city, relation', 'count': 10, 'v': '5.131'}
         method = 'users.search'
         rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
@@ -229,58 +228,25 @@ class VkBot:
                     vk_id = i.get('id')
                     first_name = i.get('first_name')
                     last_name = i.get('last_name')
-                    vk_link = 'vk.com/id' + str(i.get('id'))
-                    city = i.get('city')
-                    if city == self.get_city(user_id):
-                        # if 'city' in key:
-                        #     city = key.get('city')
-                        #     title = str(city.get('title'))
-                        #     return title
-                        # list = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name, 'city': city}
-                        # self.get_photos(self, vk_id)
-                        # create_db()
-                        # drop_users()
-                        # create_users()
-                        # insert_users(vk_id, first_name, last_name, vk_link)#КАК ОСТАВИТЬ 3 ФОТО И НАДО ЛИ ИХ ДОБАВЛЯТЬ В БД?
-                        dating_user_dict = {'first_name': first_name, 'last_name': last_name, 'city': str(city.get('title'))}
-                        return self.send_some_msg(user_id, f'{dating_user_dict[first_name]} {dating_user_dict[last_name]}')
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
-
-    # def get_daiting_user(self, user_id):
-    #     self.get_daiting_users(user_id)
-
-    def get_daiting_user(self, user_id):
-        param = {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6, 'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0, 'has_photo': 1,
-                 'fields': 'bdate, sex, city, relation', 'count': 10, 'v': '5.131'}
-        method = 'users.search'
-        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        response = rec.json()
-        daiting_user = response['response']
-        du_list = daiting_user['items']
-        # pprint(du_list)
-        try:
-            for i in du_list:
-                for key, value in i.items():
-                    id = i.get('id')
-                    first_name = i.get('first_name')
-                    last_name = i.get('last_name')
                     is_closed = i.get('is_closed')
                     bdate = i.get('bdate')
-                    bdate_list = bdate.split('.')
-                    relation = i.get('relation')
-                    sex = i.get('sex')
                     city = i.get('city')
                     if 'city' in key:
                         city = key.get('city')
                         title = str(city.get('title'))
                         return title
                     elif is_closed == False:
-                        dating_dict = {'id': id, 'first_name': first_name, 'last_name': last_name, 'city': str(city.get('title'))}
+                        dating_dict = {'id': vk_id, 'first_name': first_name, 'last_name': last_name, 'city': str(city.get('title')), 'bdate': bdate}
                         pprint(dating_dict)
+                        # drop_db_users()
+                        # create_db()
+                        # drop_users()
+                        # create_users()
+                        # insert_users(vk_id, first_name, last_name)
                     return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
+
         except KeyError:
-            self.send_some_msg(user_id, 'Ошибка говно')
+            self.send_some_msg(user_id, 'Ошибка')
 
 
     def get_photos(self, user_id):
