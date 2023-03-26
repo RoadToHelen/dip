@@ -169,14 +169,10 @@ class VkBot:
                     age = year_today - byear - 1
                     return age
 
-    def get_daiting_sex(self, user_id):
-        param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'sex', 'v': '5.131'}
-        method = 'users.get'
-        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        response = rec.json()
-        dict_user_info = response['response']
+    def get_dating_sex(self, user_id):
         try:
-            for i in dict_user_info:
+            dating_sex_dict = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'sex', 'v': '5.131'})
+            for i in dating_sex_dict:
                 for key, value in i.items():
                     sex = i.get('sex')
                     if sex == 1:
@@ -189,13 +185,9 @@ class VkBot:
             self.send_some_msg(user_id, 'Ошибка')
 
     def get_age(self, user_id):
-        param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate', 'v': '5.131'}
-        method = 'users.get'
-        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        response = rec.json()
-        dict_user_info = response['response']
         try:
-            for i in dict_user_info:
+            age_dict = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate', 'v': '5.131'})
+            for i in age_dict:
                 for key, value in i.items():
                     bdate = i.get('bdate')
                     bdate_list = bdate.split('.')
@@ -219,13 +211,9 @@ class VkBot:
             self.send_some_msg(user_id, 'Ошибка')
 
     def get_city(self, user_id):
-        param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'city', 'v': '5.131'}
-        method = 'users.get'
-        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        response = rec.json()
-        dict_user_info = response['response']
         try:
-            for i in dict_user_info:
+            city_dict = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'city', 'v': '5.131'})
+            for i in city_dict:
                 for key, value in i.items():
                     city = i.get('city')
                     return city
@@ -236,24 +224,19 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_user(self, user_id, offset=0):
-        # param = {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6,
-        #          'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
-        #          'has_photo': 1, 'offset': offset,
-        #          'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'}
-        # method = 'users.search'
-        # rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        # response = rec.json()
-        # daiting_user = response['response']
+    def get_dating_user(self, user_id, offset = 0):
+        param = {'access_token': user_token, 'sex': self.get_dating_sex(user_id), 'relation': 1 or 6,
+                 'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
+                 'has_photo': 1, 'offset': offset,
+                 'fields': 'bdate, sex, city, relation', 'count': 10, 'v': '5.131'}
+        method = 'users.search'
+        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
+        response = rec.json()
+        daiting_user = response['response']
+        du_list = daiting_user['items']
         # pprint(du_list)
         try:
-            dating_users = ('users.search', {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6,
-                            'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
-                            'has_photo': 1, 'offset': offset,
-                            'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'})
-            pprint(dating_users)
-            dating_users = dating_users[{items}]
-            for i in dating_users:
+            for i in du_list:
                 for key, value in i.items():
                     vk_id = i.get('id')
                     first_name = i.get('first_name')
@@ -271,10 +254,9 @@ class VkBot:
                         create_users()
                         # select_users()
                         # for vk_id in select_users[items]
-                        # print(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-                        # insert_users('vk_id', 'first_name', 'last_name')
-                        return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
-                        # insert_users('vk_id', 'first_name', 'last_name')
+                        print(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+                        # insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+                    return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
