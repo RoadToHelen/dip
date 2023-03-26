@@ -28,12 +28,8 @@ class VkBot:
         self.vk.method('messages.send', {'user_id': user_id, 'message': some_text, 'random_id': randrange(10**7), 'attachment': attachment})
 
     def get_user_name(self, user_id):
-        param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'}
-        method = 'users.get'
-        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        response = rec.json()
-        dict_user_info = response['response']
         try:
+            dict_user_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'v': '5.131'})
             for i in dict_user_info:
                 for key, value in i.items():
                     first_name = i.get('first_name')
