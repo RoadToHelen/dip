@@ -9,6 +9,7 @@ from vk_api.exceptions import ApiError
 import json
 from database import create_db, create_users, insert_users, drop_users, drop_db_users, select_users
 
+
 try:
     with open('group_token.txt', 'r') as file:
         group_token = file.read().strip()
@@ -37,7 +38,7 @@ class VkBot:
         except ApiError:
             return
 
-        def get_user_info(self, user_id):
+    def get_user_info(self, user_id):
         try:
             dict_user_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
             for i in dict_user_info:
@@ -57,7 +58,7 @@ class VkBot:
                     return user_list
         except ApiError:
             return
-        
+
     def get_daiting_user_info(self, user_id):
         try:
             dict_duser_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
@@ -101,9 +102,7 @@ class VkBot:
                         return title
                     dating_user_dict = {'age from': (age - 5), 'age to': (age + 5), 'city': str(city.get('title')),
                                         'sex': sex_name, 'sex_find': sex_find}
-                    dating_user = {'age from': (age - 5), 'age to': (age + 5), 'city': str(city.get('title')),
-                                   'sex_find': sex_find}
-                    # return dating_user ПОЧЕМУ НЕ ВЫВОДИТ СЛОВАРЬ???
+                    # return dating_user_dict ПОЧЕМУ НЕ ВЫВОДИТ СЛОВАРЬ???
                     # print(dating_user)
                     return self.send_some_msg(user_id, f"{self.get_user_name(user_id)}, ищем {dating_user_dict['sex']} от {dating_user_dict['age from']} до {dating_user_dict['age to']} лет из города {dating_user_dict['city']}?")
         except ApiError:
@@ -200,22 +199,27 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
-    def get_daiting_user(self, user_id, offset):
-        self.get_daiting_users
+    # def get_dating_user(self, user_id):
+    #     offset += 30
+    #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_daiting_user(self, user_id):
-        param = {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6,
-                 'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
-                 'has_photo': 1, 'offset': 1,
-                 'fields': 'bdate, sex, city, relation', 'count': 10, 'v': '5.131'}
-        method = 'users.search'
-        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        response = rec.json()
-        daiting_user = response['response']
-        du_list = daiting_user['items']
+    def get_dating_user(self, user_id, offset=0):
+        # param = {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6,
+        #          'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
+        #          'has_photo': 1, 'offset': offset,
+        #          'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'}
+        # method = 'users.search'
+        # rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
+        # response = rec.json()
+        # daiting_user = response['response']
+        # du_list = daiting_user['items']
         # pprint(du_list)
         try:
-            for i in du_list:
+            daiting_user_dict = ('users.search', {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6,
+                 'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
+                 'has_photo': 1, 'offset': offset,
+                 'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'})
+            for i in du_list_dict:
                 for key, value in i.items():
                     vk_id = i.get('id')
                     first_name = i.get('first_name')
@@ -233,9 +237,10 @@ class VkBot:
                         create_users()
                         # select_users()
                         # for vk_id in select_users[items]
-                        print(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-                    insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-                    return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
+                        # print(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+                        # insert_users('vk_id', 'first_name', 'last_name')
+                        return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
+                        # insert_users('vk_id', 'first_name', 'last_name')
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
@@ -381,7 +386,8 @@ for event in VkBot.longpoll.listen():
             # VkBot.get_user_info(user_id)
             VkBot.get_daiting_user_info(user_id)
         elif request == 'да':
-            VkBot.yes(user_id)
+            # VkBot.yes(user_id)
+            VkBot.get_dating_user(user_id)
             # VkBot.get_photos(user_id)
             # VkBot.get_photos1(user_id)
         elif request == 'пока':
