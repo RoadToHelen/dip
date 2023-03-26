@@ -42,6 +42,7 @@ class VkBot:
             dict_user_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
             for i in dict_user_info:
                 for key, value in i.items():
+                    user_id = i.get('user_id')
                     first_name = i.get('first_name')
                     last_name = i.get('last_name')
                     bdate = i.get('bdate')
@@ -53,30 +54,15 @@ class VkBot:
                         title = str(city.get('title'))
                         return title
                     # user_dict = {'first_name': first_name, 'last_name': last_name, 'bdate': bdate, 'city': str(city.get('title')), 'sex': sex, 'relation': relation}
-                    user_list = [first_name, last_name, bdate, str(city.get('title')), sex, relation]
+                    user_list = [user_id, first_name, last_name, bdate, str(city.get('title')), sex, relation]
                     return user_list
         except ApiError:
             return
-        return dict_user_info
-
-
-
-#     def get_profile_info(self, user_id):
-#         info = self.vk.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
-#         return info
-#
-# if __name__ == '__main__':
-#     tools = VkBot(access_token)
-#     print(tools.get_profile_info(user_id))
 
     def get_daiting_user_info(self, user_id):
-        param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'}
-        method = 'users.get'
-        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        response = rec.json()
-        dict_user_info = response['response']
         try:
-            for i in dict_user_info:
+            dict_duser_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
+            for i in dict_duser_info:
                 for key, value in i.items():
                     bdate = i.get('bdate')
                     bdate_list = bdate.split('.')
@@ -114,14 +100,23 @@ class VkBot:
                         city = key.get('city')
                         title = str(city.get('title'))
                         return title
-                    dating_user_dict = {'age from': (age-5), 'age to': (age+5),'city': str(city.get('title')), 'sex': sex_name, 'sex_find': sex_find}
-                    dating_user = {'age from': (age-5), 'age to': (age+5),'city': str(city.get('title')), 'sex_find': sex_find}
+                    dating_user_dict = {'age from': (age - 5), 'age to': (age + 5), 'city': str(city.get('title')),
+                                        'sex': sex_name, 'sex_find': sex_find}
+                    dating_user = {'age from': (age - 5), 'age to': (age + 5), 'city': str(city.get('title')),
+                                   'sex_find': sex_find}
                     # return dating_user ПОЧЕМУ НЕ ВЫВОДИТ СЛОВАРЬ???
                     # print(dating_user)
-                    return self.send_some_msg(user_id, f"{self.get_user_name(user_id)}, ищем {dating_user_dict['sex']} от {dating_user_dict['age from']} до {dating_user_dict['age to']} лет из города {dating_user_dict['city']}...")
-                        # f"ищем {dating_user_dict['sex']} от {dating_user_dict['age from']} до {dating_user_dict['age to']} лет из города {dating_user_dict['city']}? Если параметры подходят - набери Да"
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
+                    return self.send_some_msg(user_id, f"{self.get_user_name(user_id)}, ищем {dating_user_dict['sex']} от {dating_user_dict['age from']} до {dating_user_dict['age to']} лет из города {dating_user_dict['city']}?")
+        except ApiError:
+            return
+
+#     def get_profile_info(self, user_id):
+#         info = self.vk.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
+#         return info
+#
+# if __name__ == '__main__':
+#     tools = VkBot(access_token)
+#     print(tools.get_profile_info(user_id))
 
     def get_bdate(self, user_id):
         self.send_some_msg(user_id, 'Введите свою дату рождения в формате дд.мм.гггг: ')
