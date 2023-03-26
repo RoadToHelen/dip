@@ -29,22 +29,17 @@ class VkBot:
 
     def get_user_name(self, user_id):
         try:
-            dict_user_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'v': '5.131'})
-            for i in dict_user_info:
+            dict_user_name = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'v': '5.131'})
+            for i in dict_user_name:
                 for key, value in i.items():
                     first_name = i.get('first_name')
                     return first_name
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
+        except ApiError:
+            return
 
     def get_user_info(self, user_id):
-        param = {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'}
-        method = 'users.get'
-        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        response = rec.json()
-        dict_user_info = response['response']
-        # pprint(dict_user_info )
         try:
+            dict_user_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
             for i in dict_user_info:
                 for key, value in i.items():
                     first_name = i.get('first_name')
@@ -57,12 +52,14 @@ class VkBot:
                         city = key.get('city')
                         title = str(city.get('title'))
                         return title
-                    user_dict = {'first_name': first_name, 'last_name': last_name, 'bdate': bdate, 'city': str(city.get('title')), 'sex': sex, 'relation': relation}
-                    # return self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, {user_dict}')
-                    return user_dict
+                    # user_dict = {'first_name': first_name, 'last_name': last_name, 'bdate': bdate, 'city': str(city.get('title')), 'sex': sex, 'relation': relation}
+                    user_list = [first_name, last_name, bdate, str(city.get('title')), sex, relation]
+                    return user_list
+        except ApiError:
+            return
+        return dict_user_info
 
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
+
 
 #     def get_profile_info(self, user_id):
 #         info = self.vk.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
@@ -325,6 +322,12 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
+    def yes(self, user_id):
+        try:
+            VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_user_info(user_id)}')
+        except KeyError:
+            self.send_some_msg(user_id, 'Ошибка')
+
     def unclear(self, user_id):
         try:
             VkBot.send_some_msg(user_id, f'{self.get_user_name(user_id)}, твое сообщение мне не понятно, набери новое, пожалуйста.')
@@ -384,8 +387,9 @@ for event in VkBot.longpoll.listen():
             # VkBot.get_user_info(user_id)
             VkBot.get_daiting_user_info(user_id)
         elif request == 'да':
+            VkBot.yes(user_id)
             # VkBot.get_photos(user_id)
-            VkBot.get_photos1(user_id)
+            # VkBot.get_photos1(user_id)
         elif request == 'пока':
             VkBot.bye(user_id)
         elif request == 'продолжить':
