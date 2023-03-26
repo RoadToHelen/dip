@@ -108,13 +108,48 @@ class VkBot:
         except ApiError:
             return
 
+
+#     def user_serch(self, user_id, offset=None):
+#
+#         try:
+#             profiles = self.vk2.method('users.search',
+#                                        {'access_token': user_token, 'sex': self.get_daiting_sex(user_id),
+#                                         'relation': 1 or 6,
+#                                         'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5,
+#                                         'friend_status': 0,
+#                                         'has_photo': 1, 'offset': offset,
+#                                         'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'})
+#
+#         except ApiError:
+#             return
+#
+#         profiles = profiles['items']
+#
+#         result = []
+#         for profile in profiles:
+#             if profile['is_closed'] == False:
+#                 result.append({'name': profile['first_name'] + ' ' + profile['last_name'],
+#                                'id': profile['id']
+#                                })
+#
+#         return result
+#
+#
+#
 #     def get_profile_info(self, user_id):
-#         info = self.vk.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
+#         info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
 #         return info
 #
 # if __name__ == '__main__':
 #     tools = VkBot(access_token)
 #     print(tools.get_profile_info(user_id))
+#     info = tools.get_profile_info(789657038)
+#     if info:
+#         print(tools.get_profile_info(789657038))
+#     else:
+#         pass
+#     profiles = tools.user_serch(1, 20, 40, 1)
+#     print(profiles)
 
     def get_bdate(self, user_id):
         self.send_some_msg(user_id, 'Введите свою дату рождения в формате дд.мм.гггг: ')
@@ -204,21 +239,18 @@ class VkBot:
     #     self.get_daiting_user(self, user_id, offset=offset)
 
     def get_dating_user(self, user_id, offset=0):
-        # param = {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6,
-        #          'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
-        #          'has_photo': 1, 'offset': offset,
-        #          'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'}
-        # method = 'users.search'
-        # rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        # response = rec.json()
-        # daiting_user = response['response']
-        # du_list = daiting_user['items']
-        # pprint(du_list)
-        try:
-            daiting_user_dict = ('users.search', {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6,
+        param = {'access_token': user_token, 'sex': self.get_daiting_sex(user_id), 'relation': 1 or 6,
                  'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
                  'has_photo': 1, 'offset': offset,
-                 'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'})
+                 'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'}
+        method = 'users.search'
+        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
+        response = rec.json()
+        daiting_user = response['response']
+        du_list = daiting_user['items']
+        pprint(du_list)
+        try:
+
             for i in du_list_dict:
                 for key, value in i.items():
                     vk_id = i.get('id')
@@ -387,7 +419,7 @@ for event in VkBot.longpoll.listen():
             VkBot.get_daiting_user_info(user_id)
         elif request == 'да':
             # VkBot.yes(user_id)
-            VkBot.get_dating_user(user_id)
+            VkBot.user_serch(user_id)
             # VkBot.get_photos(user_id)
             # VkBot.get_photos1(user_id)
         elif request == 'пока':
