@@ -1,6 +1,5 @@
 import psycopg2
 
-
 def create_db():
     initial_connection = psycopg2.connect(
         database='neto',
@@ -38,13 +37,16 @@ def create_users():
 
 def insert_users(vk_id, first_name, last_name):
     try:
-        with connection.cursor() as cursor:
-            cursor.execute('''
+        cursor = connection.cursor()
+        cursor.execute('''
             INSERT INTO users(vk_id, first_name, last_name)
         VALUES
-            ('vk_id', 'first_name', 'last_name'
-            );
-        ''')
+            (%s, %s, %s)
+            '''
+            % (vk_id, first_name, last_name),
+            )
+        connection.commit()
+        cursor.close()
         print('user добавлен в таблицу')
     except KeyError:
         return
@@ -54,7 +56,7 @@ def select_users():
         with connection.cursor() as cursor:
             cursor.execute('''SELECT * FROM users''')
             # for i in cursor:
-            print(cursor.fetchone())
+            # print(cursor.fetchone())
     except KeyError:
         return
 
