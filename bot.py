@@ -37,12 +37,11 @@ class VkBot:
         except ApiError:
             return
 
-    def get_user_info(self, user_id):
+        def get_user_info(self, user_id):
         try:
             dict_user_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
             for i in dict_user_info:
                 for key, value in i.items():
-                    user_id = i.get('user_id')
                     first_name = i.get('first_name')
                     last_name = i.get('last_name')
                     bdate = i.get('bdate')
@@ -58,7 +57,7 @@ class VkBot:
                     return user_list
         except ApiError:
             return
-
+        
     def get_daiting_user_info(self, user_id):
         try:
             dict_duser_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
