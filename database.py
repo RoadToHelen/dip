@@ -67,15 +67,16 @@ def create_compilation():
     except KeyError:
         return
 
-def insert_dating_users(du_vk_id,  du_first_name,  du_last_name):
+
+def insert_dating_users(du_vk_id, du_first_name, du_last_name, vk_id):
     try:
         with connection.cursor() as cursor:
             cursor.execute('''
-            INSERT INTO users( du_vk_id,  du_first_name,  du_last_name)
+            INSERT INTO dusers( du_vk_id,  du_first_name,  du_last_name, vk_id)
             VALUES
-            ('%s', '%s', '%s');
+            ('%s', '%s', '%s', '%s');
             '''
-            % ( du_vk_id,  du_first_name,  du_last_name),
+            % ( du_vk_id,  du_first_name,  du_last_name, vk_id),
         )
         print('dating_user добавлен в таблицу')
     except KeyError:
@@ -86,7 +87,7 @@ def insert_users(vk_id, first_name, last_name):
     try:
         cursor = connection.cursor()
         cursor.execute('''
-            INSERT INTO dusers(vk_id, first_name, last_name)
+            INSERT INTO users(vk_id, first_name, last_name)
             VALUES
             ('%s', '%s', '%s');
             '''
