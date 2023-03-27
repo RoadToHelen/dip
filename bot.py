@@ -249,9 +249,10 @@ class VkBot:
                         dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name,
                                        'city': str(city.get('title')), 'bdate': bdate}
                         dating_list = (vk_id, first_name, last_name)
-                    pprint(dating_dict)
-                    print(dating_list)
-                    return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
+                        # pprint(dating_dict)
+                        # print(dating_list)
+                        return dating_list
+                        # self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
                         # drop_db_users()
                         # create_db()
                         # drop_users()
@@ -260,14 +261,14 @@ class VkBot:
                         # for vk_id in select_users[items]
                         # print(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
                         # insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-                    # return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
+                        # return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
     # def get_duser_id (self, user_id):
-    #     global vk_id
+    #     global duser_id
     #     self.get_dating_users(user_id)
-    #     vk_id = dating_list[0]
+    #     duser_id = dating_list[0]
     #
     # def get_duser_first_name(self, user_id):
     #     global first_name
@@ -280,11 +281,14 @@ class VkBot:
     #     last_name = dating_list[2]
 
     def get_dating_user(self, user_id):
-        self.get_dating_users(user_id)
-        create_db()
-        create_users()
-        select_users()
-        insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+        dating_list = self.get_dating_users(user_id)
+        # duser_id = duser_id = dating_list[0]
+        # self.get_photos(duser_id)
+        # create_db()
+        # create_users()
+        # select_users()
+        return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]}")
+        # insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
         # insert_users(dating_list[0], dating_list[1], dating_list[2])
         # insert_users(self.get_duser_id(user_id), self.get_duser_first_name(user_id), self.get_duser_last_name(user_id))
         # for i in dating_list not
@@ -292,37 +296,49 @@ class VkBot:
     if __name__ == '__main__':
         print('вход bot.py')
 
-    def get_photos(self, user_id):
-        param = {'access_token': user_token, 'album_id': 'profile', 'owner_id': user_id, 'extended': 1,
-                  'v': '5.131'}
-        method = 'photos.get'
-        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        response = rec.json()
-        photos = response['response']
-        photos_list = photos['items']
-        pprint(photos_list)
+    def get_photos(self, duser_id):
+        photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': duser_id, 'extended': 1, 'v': '5.131'})
         try:
-            for i in photos_list:
-                dict_photos = dict()
-                photo_id = str(i.get(id))
-                i_likes = i.get('likes')
-                if i_likes.get('count'):
-                    likes = i_likes.get('count')
-                    dict_photos[likes] = photo_id
-                    sorted_list = sorted(dict_photos.items(), reverse=True)
-                    return sorted_list
+            photos_list = photos['items']
+            pprint(photos_list)
         except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
+            return
+
+        result = []
+        for num, photo in enumerate(photos):
+            result.append({'owner_id': photo['owner_id'], 'id': photo['id']})
+            if num == 3:
+                break
+
+        return result
+        #     for i in photos_list:
+        #         dict_photos = dict()
+        #         photo_id = str(i.get(id))
+        #         i_likes = i.get('likes')
+        #         if i_likes.get('count'):
+        #             likes = i_likes.get('count')
+        #             dict_photos[likes] = photo_id
+        #             sorted_list = sorted(dict_photos.items(), reverse=True)
+        #             return sorted_list
+        # except KeyError:
+        #     self.send_some_msg(user_id, 'Ошибка')
 
     def get_photos1(self, user_id):
-        photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': user_id, 'extended': 1,
-                     'v': '5.131'})
+        photos = self.vk2.method('photos.get', {'album_id': 'profile', 'owner_id': user_id})
         try:
             photos = photos['items']
-            pprint(photos)
-
         except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
+            return
+
+        result = []
+        for num, photo in enumerate(photos):
+            result.append({'owner_id': photo['owner_id'],
+                           'id': photo['id']
+                           })
+            if num == 3:
+                break
+
+        return result
 
         # result = []
         # for num, photo in enumerate(photos):
@@ -406,8 +422,8 @@ for event in VkBot.longpoll.listen():
             # VkBot.get_user_info(user_id)
             VkBot.get_daiting_user_info(user_id)
         elif request == 'да':
-            # VkBot.yes(user_id)
-            VkBot.get_dating_user(user_id)
+            VkBot.yes(user_id)
+            # VkBot.get_dating_user(user_id)
             # VkBot.get_photos(user_id)
             # VkBot.get_photos1(user_id)
         elif request == 'кто я':
