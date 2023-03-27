@@ -223,12 +223,12 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = 1):
+    def get_dating_users(self, user_id, offset = 60):
         global dating_dict, dating_list
         param = {'access_token': user_token, 'sex': self.get_dating_sex(user_id), 'relation': 6,
                  'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
                  'has_photo': 1, 'offset': offset,
-                 'fields': 'bdate, sex, city, relation', 'count': 10, 'v': '5.131'}
+                 'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'}
         method = 'users.search'
         rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
         response = rec.json()
@@ -280,7 +280,7 @@ class VkBot:
         select_users()
         # for i in dating_list not in select_users():
         insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-        return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]} {self.get_photos(duser_id)}")
+        return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]} {self.send_photos(user_id)}")
         # else:
         #     self.next(user_id)
 
@@ -295,13 +295,11 @@ class VkBot:
             pprint(photos_list)
         except KeyError:
             return
-
         result = []
         for num, photo in enumerate(photos_list):
             result.append({'owner_id': photo['owner_id'], 'id': photo['id']})
             if num == 2:
                 break
-
         return result
         #     for i in photos_list:
         #         dict_photos = dict()
@@ -315,35 +313,8 @@ class VkBot:
         # except KeyError:
         #     self.send_some_msg(user_id, 'Ошибка')
 
-    def get_photos1(self, duser_id):
-        photos = self.vk2.method('photos.get',
-                                 {'album_id': 'profile',
-                                  'owner_id': duser_id,
-                                  'extended': 1,
-                                  }
-                                 )
-        try:
-            photos_list = photos['items']
-        except KeyError:
-            return
-
-        result = []
-        for num, photo in enumerate(photos_list):
-            result.append({'owner_id': int(photo['owner_id']), 'id': photo['id']})
-            if num == 2:
-                break
-
-        return result
-
-        # result = []
-        # for num, photo in enumerate(photos):
-        #     result.append({'owner_id': photo['owner_id'],
-        #                    'id': photo['id']
-        #                    })
-        #     if num == 3:
-        #         break
-        # return result
-        # pprint(result)
+    def send_photos(self, user_id):
+        self.vk2.method('messages.send', {'user_id':user_id, 'random_id': 0, 'attachment': {self.get_photos(duser_id)}})
 
 # if __name__ == '__main__':
 #     tools = VkBot(access_token)
@@ -365,15 +336,6 @@ class VkBot:
     #     return result
     #     print(result)
 
-    # def start_search(self):
-    #     for event in VkBot.longpoll.listen():
-    #         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-    #             request = event.text.lower()
-    #             user_id = str(event.user_id)
-    #             if request == 'да':
-    #                 self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, {self.get_user_info(user_id)}')
-    #             else:
-    #                 self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, твое сообщение не понятно')
     def hi(self, user_id):
         try:
             VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_user_name(user_id)}! Если хочешь подобрать пару - набери "начать поиск"')
@@ -397,7 +359,6 @@ class VkBot:
             VkBot.send_some_msg(user_id, f'{self.get_user_name(user_id)}, функция в разработке')
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
-
 
     def unclear(self, user_id):
         try:
