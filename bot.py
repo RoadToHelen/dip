@@ -223,7 +223,7 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = 3):
+    def get_dating_users(self, user_id, offset = 10):
         global dating_dict, dating_list
         param = {'access_token': user_token, 'sex': self.get_dating_sex(user_id), 'relation': 6,
                  'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
@@ -283,16 +283,18 @@ class VkBot:
     def get_dating_user(self, user_id):
         global duser_id
         dating_list = self.get_dating_users(user_id)
-        duser_id = duser_id = dating_list[0]
+        duser_id = dating_list[0]
+        photos = self.get_photos(duser_id)
+        print(photos)
         # drop_users()
         create_db()
         create_users()
         select_users()
-        for i in dating_list not in select_users():
-            insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-            return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]}")
-        else:
-            self.next(user_id)
+        # for i in dating_list not in select_users():
+        insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+        return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]} {self.get_photos(duser_id)}")
+        # else:
+        #     self.next(user_id)
 
 
     if __name__ == '__main__':
@@ -307,7 +309,7 @@ class VkBot:
             return
 
         result = []
-        for num, photo in enumerate(photos):
+        for num, photo in enumerate(photos_list):
             result.append({'owner_id': photo['owner_id'], 'id': photo['id']})
             if num == 3:
                 break
@@ -338,8 +340,8 @@ class VkBot:
             return
 
         result = []
-        for num, photo in enumerate(photos):
-            result.append({'owner_id': photo['owner_id'], 'id': photo['id']})
+        for num, photo in enumerate(photos_list):
+            result.append({'owner_id': int(photo['owner_id']), 'id': photo['id']})
             if num == 3:
                 break
 
@@ -446,4 +448,3 @@ for event in VkBot.longpoll.listen():
             VkBot.next(user_id)
         else:
             VkBot.unclear(user_id)
-
