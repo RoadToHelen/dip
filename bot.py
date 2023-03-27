@@ -289,7 +289,8 @@ class VkBot:
         # insert_users(self.get_duser_id(user_id), self.get_duser_first_name(user_id), self.get_duser_last_name(user_id))
         # for i in dating_list not
 
-
+    if __name__ == '__main__':
+        print('вход bot.py')
 
     def get_photos(self, user_id):
         param = {'access_token': user_token, 'album_id': 'profile', 'owner_id': user_id, 'extended': 1,
@@ -370,7 +371,13 @@ class VkBot:
 
     def yes(self, user_id):
         try:
-            VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_user_info(user_id)}')
+            VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_dating_user(user_id)}')
+        except KeyError:
+            self.send_some_msg(user_id, 'Ошибка')
+
+    def who(self, user_id):
+        try:
+            VkBot.send_some_msg(user_id, f'Твои данные: {VkBot.get_user_info(user_id)}')
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
@@ -385,40 +392,6 @@ class VkBot:
             VkBot.send_some_msg(user_id, f'Пока, {VkBot.get_user_name(user_id)}! До новых встреч!')
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
-
-    # def b (self):
-    #     for event in VkBot.longpoll.listen():
-    #         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-    #             request = event.text.lower()
-    #             user_id = str(event.user_id)
-                # if request == 'да':
-                #     VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, Начинаю поиск')
-                #                                  # f'{VkBot.get_daiting_user(user_id)}')
-                #     # self.get_daiting_user(user_id)
-                # elif request == 'нет':
-                #     VkBot.send_some_msg(user_id, f'{VkBot.get_user_name(user_id)}, очень жаль, до новых встреч!')
-
-
-    # def handler(self):
-    #     longpull = VkLongPoll(self.bot)
-    #     for event in longpull.listen():
-    #         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-    #             request = event.text.lower()
-    #             user_id = str(event.user_id)
-    #             if request == 'привет':
-    #                 self.hi(user_id)
-    #             elif request == 'начать поиск':
-    #                 # VkBot.get_user_info(user_id)
-    #                 self.get_daiting_user_info(user_id)
-    #             elif request == 'да':
-    #                 self.get_photos(user_id)
-    #                 # VkBot.get_daiting_users(user_id)
-    #             elif request == 'нет' or 'пока':
-    #                 self.bye(user_id)
-    #             elif request == 'продолжить':
-    #                 pass
-    #             else:
-    #                 VkBot.unclear(user_id)
 
 VkBot = VkBot()
 
@@ -437,6 +410,8 @@ for event in VkBot.longpoll.listen():
             VkBot.get_dating_user(user_id)
             # VkBot.get_photos(user_id)
             # VkBot.get_photos1(user_id)
+        elif request == 'кто я':
+            VkBot.who(user_id)
         elif request == 'пока':
             VkBot.bye(user_id)
         elif request == 'продолжить':
