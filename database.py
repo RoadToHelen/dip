@@ -27,12 +27,57 @@ def create_users():
         with connection.cursor() as cursor:
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS users(
-            vk_id VARCHAR(9) PRIMARY KEY,
-            first_name VARCHAR(20) NOT NULL,
-            last_name VARCHAR(20)
+            vk_id VARCHAR(20) PRIMARY KEY,
+            first_name VARCHAR(30) NOT NULL,
+            last_name VARCHAR(30)
             );
         ''')
         print('Таблица users создана')
+    except KeyError:
+        return
+
+
+def create_dating_users():
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS dusers(
+             du_vk_id VARCHAR(20) PRIMARY KEY,
+             du_first_name VARCHAR(30) NOT NULL,
+             du_last_name VARCHAR(30),
+             vk_id VARCHAR(20)
+            );
+        ''')
+        print('Таблица dusers создана')
+    except KeyError:
+        return
+
+
+def create_compilation():
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS compilation (
+            vk_id VARCHAR(20) NOT NULL REFERENCES users(vk_id),
+            du_vk_id VARCHAR(20) NOT NULL REFERENCES dusers(du_vk_id),
+            CONSTRAINT pk PRIMARY KEY (vk_id, du_vk_id)
+            );
+        ''')
+        print('Таблица compilation создана')
+    except KeyError:
+        return
+
+def insert_dating_users(du_vk_id,  du_first_name,  du_last_name):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('''
+            INSERT INTO users( du_vk_id,  du_first_name,  du_last_name)
+            VALUES
+            ('%s', '%s', '%s');
+            '''
+            % ( du_vk_id,  du_first_name,  du_last_name),
+        )
+        print('dating_user добавлен в таблицу')
     except KeyError:
         return
 
@@ -41,7 +86,7 @@ def insert_users(vk_id, first_name, last_name):
     try:
         cursor = connection.cursor()
         cursor.execute('''
-            INSERT INTO users(vk_id, first_name, last_name)
+            INSERT INTO dusers(vk_id, first_name, last_name)
             VALUES
             ('%s', '%s', '%s');
             '''
@@ -58,6 +103,15 @@ def select_users():
     try:
         with connection.cursor() as cursor:
             cursor.execute('''SELECT * FROM users''')
+            print(cursor.fetchall())
+    except KeyError:
+        return
+
+
+def select_dating_users():
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('''SELECT * FROM dusers''')
             print(cursor.fetchall())
     except KeyError:
         return
