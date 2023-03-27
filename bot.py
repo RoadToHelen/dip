@@ -6,7 +6,7 @@ from pprint import pprint
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.exceptions import ApiError
-from database import create_db, create_users, select_users, insert_users
+from database import create_db, create_users, select_users, insert_users, drop_users
 
 
 try:
@@ -223,7 +223,7 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = 0):
+    def get_dating_users(self, user_id, offset = 3):
         global dating_dict, dating_list
         param = {'access_token': user_token, 'sex': self.get_dating_sex(user_id), 'relation': 6,
                  'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
@@ -254,13 +254,13 @@ class VkBot:
                         return dating_list
                         # self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
                         # drop_db_users()
-                        # create_db()
+                        create_db()
                         # drop_users()
-                        # create_users()
+                        create_users()
                         # select_users()
                         # for vk_id in select_users[items]
                         # print(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-                        # insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+                        insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
                         # return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
@@ -281,22 +281,24 @@ class VkBot:
     #     last_name = dating_list[2]
 
     def get_dating_user(self, user_id):
+        global duser_id
         dating_list = self.get_dating_users(user_id)
-        # duser_id = duser_id = dating_list[0]
-        # self.get_photos(duser_id)
-        # create_db()
-        # create_users()
-        # select_users()
-        return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]}")
-        # insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-        # insert_users(dating_list[0], dating_list[1], dating_list[2])
-        # insert_users(self.get_duser_id(user_id), self.get_duser_first_name(user_id), self.get_duser_last_name(user_id))
-        # for i in dating_list not
+        duser_id = duser_id = dating_list[0]
+        # drop_users()
+        create_db()
+        create_users()
+        select_users()
+        for i in dating_list not in select_users():
+            insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+            return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]}")
+        else:
+            self.next(user_id)
+
 
     if __name__ == '__main__':
         print('вход bot.py')
 
-    def get_photos(self, duser_id):
+    def get_photos1(self, duser_id):
         photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': duser_id, 'extended': 1, 'v': '5.131'})
         try:
             photos_list = photos['items']
@@ -323,18 +325,21 @@ class VkBot:
         # except KeyError:
         #     self.send_some_msg(user_id, 'Ошибка')
 
-    def get_photos1(self, user_id):
-        photos = self.vk2.method('photos.get', {'album_id': 'profile', 'owner_id': user_id})
+    def get_photos(self, duser_id):
+        photos = self.vk2.method('photos.get',
+                                 {'album_id': 'profile',
+                                  'owner_id': duser_id,
+                                  'extended': 1,
+                                  }
+                                 )
         try:
-            photos = photos['items']
+            photos_list = photos['items']
         except KeyError:
             return
 
         result = []
         for num, photo in enumerate(photos):
-            result.append({'owner_id': photo['owner_id'],
-                           'id': photo['id']
-                           })
+            result.append({'owner_id': photo['owner_id'], 'id': photo['id']})
             if num == 3:
                 break
 
@@ -397,6 +402,13 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
+    def next(self, user_id):
+        try:
+            VkBot.send_some_msg(user_id, f'{self.get_user_name(user_id)}, функция в разработке')
+        except KeyError:
+            self.send_some_msg(user_id, 'Ошибка')
+
+
     def unclear(self, user_id):
         try:
             VkBot.send_some_msg(user_id, f'{self.get_user_name(user_id)}, твое сообщение мне не понятно, набери новое, пожалуйста.')
@@ -431,6 +443,7 @@ for event in VkBot.longpoll.listen():
         elif request == 'пока':
             VkBot.bye(user_id)
         elif request == 'продолжить':
-            pass
+            VkBot.next(user_id)
         else:
             VkBot.unclear(user_id)
+
