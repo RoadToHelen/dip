@@ -43,7 +43,7 @@ def insert_users(vk_id, first_name, last_name):
         cursor.execute('''
             INSERT INTO users(vk_id, first_name, last_name)
             VALUES
-            (%s, %s, %s);
+            ('%s', '%s', '%s');
             '''
             % (vk_id, first_name, last_name),
         )
