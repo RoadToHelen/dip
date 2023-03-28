@@ -306,7 +306,7 @@ class VkBot:
                 return
 
             result = []
-            for i in photos:
+            for i in photos_list:
                 for key, value in i.items():
                     likes = i.get('likes')
                     photo_id = i.get('id')
