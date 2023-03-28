@@ -292,14 +292,11 @@ class VkBot:
     # if __name__ == '__main__':
     #     print('вход bot.py')
     #
-    # def sorted_photos(self, duser_id):
-    #     photos = self.get_photos(duser_id)
-    #     list = sorted(photos, key='likes', reverse=True)
-    #     return list
+
 
     def get_photos(self, duser_id):
         try:
-            photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': duser_id, 'extended': 1, 'count': 30,  'v': '5.131'})
+            photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': duser_id, 'extended': 1, 'count': 3,  'v': '5.131'})
             photos_list = photos['items']
             pprint(photos_list)
         except KeyError:
@@ -313,6 +310,8 @@ class VkBot:
                 owner_id = i.get('owner_id')
                 result.append({'likes': str(likes.get('count')), 'owner_id': owner_id, 'photo_id': photo_id})
                 return result
+                # list = sorted(result.items(), key=lambda item: item[0], reverse=True)
+                # return list
 
             # for num, photo in photos:
             #     likes = photo.get('likes')
