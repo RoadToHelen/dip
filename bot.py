@@ -223,7 +223,7 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = 100):
+    def get_dating_users(self, user_id, offset = 110):
         global dating_dict, dating_list
         param = {'access_token': user_token, 'sex': self.get_dating_sex(user_id), 'relation': 6,
                  'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
@@ -249,22 +249,8 @@ class VkBot:
                         dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name,
                                        'city': str(city.get('title')), 'bdate': bdate}
                         dating_list = (vk_id, first_name, last_name)
-                        # pprint(dating_dict)
-                        # print(dating_list)
-                        # drop_users()
-                        # create_db()
-                        # create_users()
-                        # insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
                         return dating_list
-                        # self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
-                        # drop_db_users()
-                        # drop_users()
-                        # create_users()
-                        # select_users()
-                        # for vk_id in select_users[items]
-                        # print(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-                        # insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-                        # return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}")
+
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
@@ -288,8 +274,11 @@ class VkBot:
         #     # if duser_id in items:
         #     #     self.next(user_id)
         #     else:
-            insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-            return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', {photos()})
+        #     insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+            # return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', {photos()})
+            # return self.send_photos(user_id, f'{dating_list[1]} {dating_list[2]}', {photos[0]})
+            # return self.send_photos(user_id, f'{dating_list[1]} {dating_list[2]}', {duser_id}_{self.get_photos(duser_id)})
+            return f"{self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}')} {self.send_photos(user_id, photos)}"
         except KeyError:
             return
         # else:
@@ -303,7 +292,7 @@ class VkBot:
         photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': duser_id, 'extended': 1, 'v': '5.131'})
         try:
             photos_list = photos['items']
-            pprint(photos_list)
+            # pprint(photos_list)
         except KeyError:
             return
         result = []
@@ -323,6 +312,14 @@ class VkBot:
         #             return sorted_list
         # except KeyError:
         #     self.send_some_msg(user_id, 'Ошибка')
+
+    def send_photos(self, user_id, attachment):
+        try:
+            self.vk2.method('messages.send', {'user_id': user_id, 'random_id': randrange(10**7), 'attachment': attachment})
+            # photo {duser_id}_{media_id}
+        except ApiError:
+            return
+
 
 # if __name__ == '__main__':
 #     tools = VkBot(access_token)
