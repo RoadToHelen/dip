@@ -259,13 +259,17 @@ class VkBot:
         dating_list = self.get_dating_users(user_id)
         duser_id = dating_list[0]
         photos_dict = self.get_photos(duser_id)
-        print(photos_dict)
-        photos_list = photos_dict[('Values')]
+        # print(photos_dict)
+        photos_list = photos_dict['items']
+        print(photos_list)
+        photo1 = du_list[0]
+        photo2 = du_list[1]
+        photo3 = du_list[2]
         # drop_users()
         # create_db()
         # create_users()
         # select_users()
-        return self.send_photos(user_id, f'photo{duser_id}_{photos_list}')
+        return self.send_photos(user_id, f'photo{duser_id}_{photo1, photo2, photo3}')
         # return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', self.send_photos(user_id, photo{duser_id}_{photos_list}))
 
         # db_dusers = select_users()
