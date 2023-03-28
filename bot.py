@@ -260,16 +260,13 @@ class VkBot:
         duser_id = dating_list[0]
         photos_dict = self.get_photos(duser_id)
         print(photos_dict)
+        photos_list = photos_dict[('Values')]
         # drop_users()
         # create_db()
         # create_users()
         # select_users()
-        try:
-            for i in photos_dict:
-                for key, value in i.items():
-                    owner_id = i.get('owner_id')
-                    id = i.get('id')
-            return self.send_photos(user_id, f'{dating_list[1]} {dating_list[2]} photo{owner_id}_{id}')
+        return self.send_photos(user_id, f'photo{duser_id}_{photos_list}')
+        # return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', self.send_photos(user_id, photo{duser_id}_{photos_list}))
 
         # db_dusers = select_users()
         #     for i in db_dusers:
@@ -285,8 +282,8 @@ class VkBot:
             # return self.send_photos(user_id, f'{dating_list[1]} {dating_list[2]}', {photos[0]})
             # return self.send_photos(user_id, f'{dating_list[1]} {dating_list[2]}', {duser_id}_{self.get_photos(duser_id)})
             # return f"{self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}')} {self.send_photos(user_id, photos)}"
-        except KeyError:
-            return
+        # except KeyError:
+        #     return
         # else:
         #     self.next(user_id)
 
