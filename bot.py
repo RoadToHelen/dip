@@ -223,7 +223,7 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = 80):
+    def get_dating_users(self, user_id, offset = 100):
         global dating_dict, dating_list
         param = {'access_token': user_token, 'sex': self.get_dating_sex(user_id), 'relation': 6,
                  'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
@@ -289,7 +289,7 @@ class VkBot:
         #     #     self.next(user_id)
         #     else:
             insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-            return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]} 'attachment': {photos}")
+            return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', {photos()})
         except KeyError:
             return
         # else:
@@ -323,9 +323,6 @@ class VkBot:
         #             return sorted_list
         # except KeyError:
         #     self.send_some_msg(user_id, 'Ошибка')
-
-    def send_photos(self, user_id):
-        self.vk2.method('messages.send', {'user_id':user_id, 'random_id': 0, 'attachment': {self.get_photos(duser_id)}})
 
 # if __name__ == '__main__':
 #     tools = VkBot(access_token)
@@ -393,13 +390,9 @@ for event in VkBot.longpoll.listen():
         if request == 'привет':
             VkBot.hi(user_id)
         elif request == 'начать поиск':
-            # VkBot.get_user_info(user_id)
             VkBot.get_daiting_user_info(user_id)
         elif request == 'да':
             VkBot.yes(user_id)
-            # VkBot.get_dating_user(user_id)
-            # VkBot.get_photos(user_id)
-            # VkBot.get_photos1(user_id)
         elif request == 'кто я':
             VkBot.who(user_id)
         elif request == 'пока':
