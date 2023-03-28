@@ -223,7 +223,7 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = 110):
+    def get_dating_users(self, user_id, offset = 0):
         global dating_dict, dating_list
         param = {'access_token': user_token, 'sex': self.get_dating_sex(user_id), 'relation': 6,
                  'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
@@ -258,14 +258,20 @@ class VkBot:
         global duser_id
         dating_list = self.get_dating_users(user_id)
         duser_id = dating_list[0]
-        photos = self.get_photos(duser_id)
-        print(photos)
+        photos_dict = self.get_photos(duser_id)
+        print(photos_dict)
         # drop_users()
-        create_db()
-        create_users()
-        select_users()
-        db_dusers = select_users()
+        # create_db()
+        # create_users()
+        # select_users()
         try:
+            for i in photos_dict:
+                for key, value in i.items():
+                    owner_id = i.get('owner_id')
+                    id = i.get('id')
+            return self.send_photos(user_id, f'{dating_list[1]} {dating_list[2]} photo{owner_id}_{id}')
+
+        # db_dusers = select_users()
         #     for i in db_dusers:
         #         for value in i.items():
         #             if duser_id == i.items[0]:
@@ -275,10 +281,10 @@ class VkBot:
         #     #     self.next(user_id)
         #     else:
         #     insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-            # return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', {photos()})
+        #     return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]} {photos}')
             # return self.send_photos(user_id, f'{dating_list[1]} {dating_list[2]}', {photos[0]})
             # return self.send_photos(user_id, f'{dating_list[1]} {dating_list[2]}', {duser_id}_{self.get_photos(duser_id)})
-            return f"{self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}')} {self.send_photos(user_id, photos)}"
+            # return f"{self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}')} {self.send_photos(user_id, photos)}"
         except KeyError:
             return
         # else:
