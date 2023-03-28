@@ -278,9 +278,20 @@ class VkBot:
         create_db()
         create_users()
         select_users()
-        # for i in dating_list not in select_users():
-        insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-        return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]} {self.send_photos(user_id)}")
+        db_dusers = select_users()
+        try:
+            for i in db_dusers:
+                for value in i.items():
+                    if duser_id == i.items[0]:
+                        self.next(user_id)
+            # items = [v[0] for v in db_dusers]
+            # if duser_id in items:
+            #     self.next(user_id)
+            else:
+                insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+            return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]} 'attachment': {self.get_photos(duser_id)}")
+        except KeyError:
+            return
         # else:
         #     self.next(user_id)
 
