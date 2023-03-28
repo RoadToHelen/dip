@@ -295,28 +295,25 @@ class VkBot:
     # if __name__ == '__main__':
     #     print('вход bot.py')
 
+
+
     def get_photos(self, duser_id):
-            photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': duser_id, 'extended': 1, 'v': '5.131'})
             try:
-                photos = photos['items']
-                # pprint(photos_list)
+                photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': duser_id, 'extended': 1, 'count': 30,  'v': '5.131'})
+                photos_list = photos['items']
+                pprint(photos_list)
             except KeyError:
                 return
+
             result = []
-            liked_photos = []
-            for item in result['items']:
-                likes = item.get('likes')
-                if likes:
-                    liked_photos.append((likes.get("count", 0), int(item['id'])))
-                for i in liked_photos:
-                    dict_photos = dict()
-                    photo_id = int(i.get(id))
+            for i in photos:
+                for key, value in i.items():
                     likes = i.get('likes')
-                    if likes.get('count'):
-                        likes = likes.get('count')
-                        dict_photos[likes] = photo_id
-                        sorted_list = sorted(dict_photos.items(), reverse=True)
-                        return sorted_list
+                    photo_id = i.get('id')
+                    owner_id = i.get('owner_id')
+                    result.append({'owner_id': owner_id ,'photo_id': photo_id, 'likes': str(likes.get('count'))})
+                    return result
+
             # for num, photo in photos:
             #     likes = photo.get('likes')
             #     liked_photos = []
