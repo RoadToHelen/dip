@@ -223,7 +223,7 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = 60):
+    def get_dating_users(self, user_id, offset = 80):
         global dating_dict, dating_list
         param = {'access_token': user_token, 'sex': self.get_dating_sex(user_id), 'relation': 6,
                  'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
@@ -280,16 +280,16 @@ class VkBot:
         select_users()
         db_dusers = select_users()
         try:
-            for i in db_dusers:
-                for value in i.items():
-                    if duser_id == i.items[0]:
-                        self.next(user_id)
-            # items = [v[0] for v in db_dusers]
-            # if duser_id in items:
-            #     self.next(user_id)
-            else:
-                insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-            return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]} 'attachment': {self.get_photos(duser_id)}")
+        #     for i in db_dusers:
+        #         for value in i.items():
+        #             if duser_id == i.items[0]:
+        #                 self.next(user_id)
+        #     # items = [v[0] for v in db_dusers]
+        #     # if duser_id in items:
+        #     #     self.next(user_id)
+        #     else:
+            insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+            return self.send_some_msg(user_id, f"{dating_list[1]} {dating_list[2]} 'attachment': {photos}")
         except KeyError:
             return
         # else:
