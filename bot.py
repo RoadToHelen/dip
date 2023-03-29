@@ -57,15 +57,33 @@ class VkBot:
                     sex = i.get('sex')
                     relation = i.get('relation')
                     city = i.get('city')
-                    if 'city' in key:
-                        city = key.get('city')
-                        title = str(city.get('title'))
-                        return title
+                    if (bdate != None) and (city != None) and (sex != None) and (relation != None):
                     # user_dict = {'first_name': first_name, 'last_name': last_name, 'bdate': bdate, 'city': str(city.get('title')), 'sex': sex, 'relation': relation}
-                    user_list = [user_id, first_name, last_name, bdate, str(city.get('title')), sex, relation]
-                    return user_list
+                        user_list = [user_id, first_name, last_name, bdate, str(city.get('title')), sex, relation]
+                        return user_list
+                    else:
+                        self.get_user_data(user_id)
         except ApiError:
             return
+
+    def get_user_data(self, user_id):
+        try:
+            self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, ищем возраст от (min = 18):')
+            for event in self.longpoll.listen():
+                if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                    age_from = event.text
+                    self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, ищем возраст по:')
+                    for event in self.longpoll.listen():
+                        if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                            age_to = event.text
+                            self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, внесите город поиска:')
+                            for event in self.longpoll.listen():
+                                if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+                                    city = event.text
+                            user_data = {'age_from': age_from, 'age_to': age_to, 'city': city}
+                            return user_data
+        except KeyError:
+            self.send_some_msg(user_id, 'Ошибка')
 
     def get_daiting_user_info(self, user_id):
         try:
@@ -232,31 +250,47 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = None):
+    def get_dating_users(self, user_id, offset = 68):
         global dating_dict
         try:
-            daiting_user = self.vk2.method('users.search',
-                                           {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
-                                            'relation': 6, 'age_from': self.get_age(user_id) - 5,
-                                            'age_to': self.get_age(user_id) + 5, 'friend_status': 0, 'has_photo': 1,
-                                            'offset': offset, 'fields': 'bdate, sex, city, relation', 'count': 30,
-                                            'v': '5.131'})
-            du_list = daiting_user['items']
-            for i in du_list:
+            dict_user_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
+            for i in dict_user_info:
                 for key, value in i.items():
-                    global vk_id, first_name, last_name
-                    vk_id = i.get('id')
-                    first_name = i.get('first_name')
-                    last_name = i.get('last_name')
-                    is_closed = i.get('is_closed')
                     bdate = i.get('bdate')
                     city = i.get('city')
-                    if city == self.get_city(user_id) and is_closed == False:
-                        dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name,
-                                       'city': str(city.get('title')), 'bdate': bdate}
-                        dating_list = (vk_id, first_name, last_name)
-                        return dating_list
-
+                    if (bdate is None and city is None) or (request == 'нет'):
+                        data = self.get_user_data(user_id)
+                        daiting_user = self.vk2.method('users.search',
+                                                       {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
+                                                        'relation': 6, 'age_from': data['age_from'],
+                                                        'age_to': data['age_to'], 'city': data['city'], 'friend_status': 0, 'has_photo': 1,
+                                                        'offset': offset, 'fields': 'bdate, sex, city, relation', 'count': 30,
+                                                        'v': '5.131'})
+                        print(daiting_user)
+                    else:
+                        daiting_user = self.vk2.method('users.search',
+                                                       {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
+                                                        'relation': 6, 'age_from': self.get_age(user_id) - 5,
+                                                        'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
+                                                        'has_photo': 1,
+                                                        'offset': offset, 'fields': 'bdate, sex, city, relation',
+                                                        'count': 30,
+                                                        'v': '5.131'})
+                    du_list = daiting_user['items']
+                    for i in du_list:
+                        for key, value in i.items():
+                            global vk_id, first_name, last_name
+                            vk_id = i.get('id')
+                            first_name = i.get('first_name')
+                            last_name = i.get('last_name')
+                            is_closed = i.get('is_closed')
+                            bdate = i.get('bdate')
+                            city = i.get('city')
+                            if city == self.get_city(user_id) and is_closed == False:
+                                dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name,
+                                               'city': str(city.get('title')), 'bdate': bdate}
+                                dating_list = (vk_id, first_name, last_name)
+                                return dating_list
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
@@ -280,7 +314,7 @@ class VkBot:
             # else:
             insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
             photos_list = self.get_photos(duser_id)
-            return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
+            return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}", photos_list)
             # for i in db_dusers_list:
             #     if i is None or i != duser_id:
             #         insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
@@ -342,7 +376,13 @@ class VkBot:
 
     def yes(self, user_id):
         try:
-            VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_dating_user(user_id)}')
+            VkBot.send_some_msg(user_id, f'{VkBot.get_dating_user(user_id)}')
+        except KeyError:
+            self.send_some_msg(user_id, 'Ошибка')
+
+    def no(self, user_id):
+        try:
+            VkBot.send_some_msg(user_id, f'{VkBot.get_user_data(user_id)}')
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
@@ -384,6 +424,8 @@ for event in VkBot.longpoll.listen():
             VkBot.get_daiting_user_info(user_id)
         elif request == 'да':
             VkBot.yes(user_id)
+        elif request == 'нет':
+            VkBot.no(user_id)
         elif request == 'кто я':
             VkBot.who(user_id)
         elif request == 'пока':
