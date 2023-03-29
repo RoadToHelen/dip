@@ -293,10 +293,35 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
+    # def get_dating_user1(self, user_id):
+    #     global duser_id
+    #     try:
+    #         dating_list = self.user_search(user_id)
+    #         duser_id = dating_list[0]
+    #         user_list = self.get_user_info(user_id)
+    #         user = user_list[0]
+    #         print(user)
+    #         # drop_users()
+    #         create_db()
+    #         create_users()
+    #         select_users()
+    #         select_duser_ids()
+    #
+    #         # db_dusers = {int(vk_id[0]) for duser_id in checkes_users}
+    #         # if duser_id in db_dusers:
+    #         #     self.next(user_id)
+    #         # else:
+    #         insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+    #         photos_list = self.get_photos(duser_id)
+    #         self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}", photos_list)
+    #
+    #     except ApiError:
+    #         return
+
     def get_dating_user(self, user_id):
         global duser_id
         try:
-            # dating_list = self.get_dating_users(user_id)
+            dating_list = self.get_dating_users(user_id)
             duser_id = dating_list[0]
             user_list = self.get_user_info(user_id)
             user = user_list[0]
@@ -337,6 +362,8 @@ class VkBot:
 
     # if __name__ == '__main__':
     #     print('вход bot.py')
+
+
 
     def get_photos(self, duser_id):
         try:
@@ -388,7 +415,7 @@ class VkBot:
 
     def no(self, user_id):
         try:
-            VkBot.send_some_msg(user_id, f'{VkBot.user_data(user_id)}')
+            VkBot.send_some_msg(user_id, f'{VkBot.get_dating_user(user_id)}')
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
