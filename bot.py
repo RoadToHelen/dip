@@ -260,8 +260,7 @@ class VkBot:
             dating_list = self.get_dating_users(user_id)
             duser_id = dating_list[0]
             photos_list = self.get_photos(duser_id)
-            print(photos_list)
-            return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]} {photos_list}')
+            return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
         # drop_users()
         # create_db()
         # create_users()
@@ -298,56 +297,18 @@ class VkBot:
         try:
             photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': duser_id, 'extended': 1, 'count': 3,  'v': '5.131'})
             photos_list = photos['items']
-            pprint(photos_list)
+            # pprint(photos_list)
         except KeyError:
             return
 
-        result = []
-        for i in photos_list:
-            for key, value in i.items():
-                likes = i.get('likes')
-                photo_id = i.get('id')
-                owner_id = i.get('owner_id')
-                result.append({'likes': str(likes.get('count')), 'owner_id': owner_id, 'photo_id': photo_id})
-                return result
-                # list = sorted(result.items(), key=lambda item: item[0], reverse=True)
-                # return list
+        sorted_photos = sorted(photos_list, key=lambda x: x['likes']['count'], reverse=True)[:3]
+        new_list = []
+        for item in sorted_photos:
+            photo_id = item.get('id')
+            owner_id = item.get('owner_id')
+            new_list.append(f'photo{owner_id}_{photo_id}')
 
-            # for num, photo in photos:
-            #     likes = photo.get('likes')
-            #     liked_photos = []
-            #     if likes:
-            #         liked_photos.append((likes.get("count", 0), str(photo['id'])))
-            #
-            #         result.append({'owner_id': photo['owner_id'], 'id': photo['id'], })
-            #         if num == 2:
-            #             break
-            # return result
-
-
-        # result = []
-        # for num, photo in photos_list:
-        #     likes = item.get('likes')
-        #     result.append({'owner_id': photo['owner_id'], 'id': photo['id']})
-        #     if num == 2:
-        #         break
-        # return result
-        # liked_photos = []
-        # for item in result['items']:
-        #     likes = item.get('likes')
-        #     if likes:
-        #         liked_photos.append((likes.get("count", 0), str(item["id"])))
-        #     for i in photos_list:
-        #         dict_photos = dict()
-        #         photo_id = str(i.get(id))
-        #         i_likes = i.get('likes')
-        #         if i_likes.get('count'):
-        #             likes = i_likes.get('count')
-        #             dict_photos[likes] = photo_id
-        #             sorted_list = sorted(dict_photos.items(), reverse=True)
-        #             return sorted_list
-        # except KeyError:
-        #     self.send_some_msg(user_id, 'Ошибка')
+        return ','.join(new_list)
 
     def send_photos(self, user_id, attachment):
         try:
