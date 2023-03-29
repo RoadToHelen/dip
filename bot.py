@@ -18,6 +18,15 @@ except FileNotFoundError:
     group_token = input('group_token: ')
     user_token = input('user_token: ')
 
+
+# class DataBase:
+#     def __init__(self):
+#
+#     def create_db
+#
+#
+# DataBase = DataBase()
+
 class VkBot:
     def __init__(self):
         self.vk = vk_api.VkApi(token=group_token)
@@ -223,19 +232,16 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = 1):
-        global dating_dict, dating_list
-        param = {'access_token': user_token, 'sex': self.get_dating_sex(user_id), 'relation': 6,
-                 'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
-                 'has_photo': 1, 'offset': offset,
-                 'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'}
-        method = 'users.search'
-        rec = requests.get(url=f'https://api.vk.com/method/{method}', params=param)
-        response = rec.json()
-        daiting_user = response['response']
-        du_list = daiting_user['items']
-        # pprint(du_list)
+    def get_dating_users(self, user_id, offset = 5):
         try:
+            daiting_user = self.vk2.method('users.search',
+                                           {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
+                                            'relation': 6, 'age_from': self.get_age(user_id) - 5,
+                                            'age_to': self.get_age(user_id) + 5, 'friend_status': 0, 'has_photo': 1,
+                                            'offset': offset, 'fields': 'bdate, sex, city, relation', 'count': 30,
+                                            'v': '5.131'})
+            du_list = daiting_user['items']
+            # pprint(daiting_user)
             for i in du_list:
                 for key, value in i.items():
                     global vk_id, first_name, last_name
@@ -287,11 +293,8 @@ class VkBot:
         # else:
         #     self.next(user_id)
 
-
     # if __name__ == '__main__':
     #     print('вход bot.py')
-    #
-
 
     def get_photos(self, duser_id):
         try:
@@ -309,14 +312,6 @@ class VkBot:
             new_list.append(f'photo{owner_id}_{photo_id}')
 
         return ','.join(new_list)
-
-    def send_photos(self, user_id, attachment):
-        try:
-            self.vk2.method('messages.send', {'user_id': user_id, 'random_id': randrange(10**7), 'attachment': attachment})
-            # photo {duser_id}_{media_id}
-        except ApiError:
-            return
-
 
 # if __name__ == '__main__':
 #     tools = VkBot(access_token)
@@ -374,6 +369,7 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
+
 VkBot = VkBot()
 
 
@@ -391,7 +387,7 @@ for event in VkBot.longpoll.listen():
             VkBot.who(user_id)
         elif request == 'пока':
             VkBot.bye(user_id)
-        elif request == 'продолжить':
+        elif request == ('продолжить','еще', 'далее', 'следующий'):
             VkBot.next(user_id)
         else:
             VkBot.unclear(user_id)
