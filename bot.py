@@ -4,7 +4,7 @@ from pprint import pprint
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.exceptions import ApiError
-from database import create_db, create_users, select_users, insert_users, drop_users
+from database import create_db, create_users, select_users, insert_users, drop_users, select_duser_ids
 
 
 try:
@@ -33,6 +33,16 @@ class VkBot:
                 for key, value in i.items():
                     first_name = i.get('first_name')
                     return first_name
+        except ApiError:
+            return
+
+    def get_user_id(self, user_id):
+        try:
+            dict_user_id = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'v': '5.131'})
+            for i in dict_user_id:
+                for key, value in i.items():
+                    user = i.get('user_ids')
+                    return user
         except ApiError:
             return
 
@@ -250,33 +260,34 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
-    def db(self):
-        global db_dusers
-        try:
-            # drop_users()
-            create_db()
-            create_users()
-            select_users()
-            db_dusers_list = select_users()
-            print(db_dusers_list)
-        except KeyError:
-            return
-
     def get_dating_user(self, user_id):
         global duser_id
         try:
             dating_list = self.get_dating_users(user_id)
             duser_id = dating_list[0]
-            db_dusers_list = self.db()
-            print(db_dusers_list)
-            for i in db_dusers_list:
-                if i is None or i != duser_id:
-                    insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-                    pprint(db_dusers)
-                    photos_list = self.get_photos(duser_id)
-                    return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
-                else:
-                    self.next(user_id)
+            user_list = self.get_user_info(user_id)
+            user = user_list[0]
+            print(user)
+            # drop_users()
+            create_db()
+            create_users()
+            select_users()
+            select_duser_ids()
+
+            # db_dusers = {int(vk_id[0]) for duser_id in checkes_users}
+            # if duser_id in db_dusers:
+            #     self.next(user_id)
+            # else:
+            insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+            photos_list = self.get_photos(duser_id)
+            return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
+            # for i in db_dusers_list:
+            #     if i is None or i != duser_id:
+            #         insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+            #         photos_list = self.get_photos(duser_id)
+            #         return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
+            #     else:
+            #         self.next(user_id)
         # drop_users()
         # create_db()
         # create_users()
@@ -377,7 +388,7 @@ for event in VkBot.longpoll.listen():
             VkBot.who(user_id)
         elif request == 'пока':
             VkBot.bye(user_id)
-        elif request == ('продолжить','еще', 'далее', 'следующий'):
+        elif request == 'еще':
             VkBot.next(user_id)
         else:
             VkBot.unclear(user_id)
