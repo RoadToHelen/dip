@@ -9,7 +9,7 @@ def create_db():
         port='5432'
     )
     initial_connection.close()
-    print('БД neto создана')
+    print('Database neto created')
 
 connection = psycopg2.connect(
     host='localhost',
@@ -27,58 +27,12 @@ def create_users():
         with connection.cursor() as cursor:
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS users(
-            vk_id VARCHAR(20) PRIMARY KEY,
-            first_name VARCHAR(30) NOT NULL,
-            last_name VARCHAR(30)
+            vk_id VARCHAR(9) PRIMARY KEY,
+            first_name VARCHAR(20) NOT NULL,
+            last_name VARCHAR(20)
             );
         ''')
-        print('Таблица users создана')
-    except KeyError:
-        return
-
-
-def create_dating_users():
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS dusers(
-             du_vk_id VARCHAR(20) PRIMARY KEY,
-             du_first_name VARCHAR(30) NOT NULL,
-             du_last_name VARCHAR(30),
-             vk_id VARCHAR(20)
-            );
-        ''')
-        print('Таблица dusers создана')
-    except KeyError:
-        return
-
-
-def create_compilation():
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS compilation (
-            vk_id VARCHAR(20) NOT NULL REFERENCES users(vk_id),
-            du_vk_id VARCHAR(20) NOT NULL REFERENCES dusers(du_vk_id),
-            CONSTRAINT pk PRIMARY KEY (vk_id, du_vk_id)
-            );
-        ''')
-        print('Таблица compilation создана')
-    except KeyError:
-        return
-
-
-def insert_dating_users(du_vk_id, du_first_name, du_last_name, vk_id):
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('''
-            INSERT INTO dusers( du_vk_id,  du_first_name,  du_last_name, vk_id)
-            VALUES
-            ('%s', '%s', '%s', '%s');
-            '''
-            % ( du_vk_id,  du_first_name,  du_last_name, vk_id),
-        )
-        print('dating_user добавлен в таблицу')
+        print('Table users created')
     except KeyError:
         return
 
@@ -95,7 +49,7 @@ def insert_users(vk_id, first_name, last_name):
         )
         connection.commit()
         cursor.close()
-        print('user добавлен в таблицу')
+        print('user added at table')
     except KeyError:
         return
 
@@ -109,10 +63,28 @@ def select_users():
         return
 
 
-def select_dating_users():
+def check_users(duser_id):
+    try:
+        cursor = connection.cursor()
+        cursor.execute(
+            """
+                    SELECT vk_id
+                    FROM users
+                    WHERE duser_id):= '%s';
+                """
+            % duser_id
+        )
+        _data = cursor.fetchall()
+        cursor.close()
+        return _data
+    except KeyError:
+        return
+
+
+def select_dusers_ids():
     try:
         with connection.cursor() as cursor:
-            cursor.execute('''SELECT * FROM dusers''')
+            cursor.execute('''SELECT vk_id FROM users''')
             print(cursor.fetchall())
     except KeyError:
         return
@@ -125,7 +97,7 @@ def drop_users():
             DROP TABLE IF EXISTS users;
             '''
             )
-            print('Таблица users удалена')
+            print('Table users deleted')
     except KeyError:
         return
 
@@ -137,6 +109,6 @@ def drop_db_users():
             DROP DATABASE IF EXISTS users;
             '''
             )
-            print('База данных users удалена')
+            print('Database users deleted')
     except KeyError:
         return
