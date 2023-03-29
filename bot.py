@@ -1,7 +1,5 @@
-import random
 from random import randrange
 import datetime
-import requests
 from pprint import pprint
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
@@ -18,14 +16,6 @@ except FileNotFoundError:
     group_token = input('group_token: ')
     user_token = input('user_token: ')
 
-
-# class DataBase:
-#     def __init__(self):
-#
-#     def create_db
-#
-#
-# DataBase = DataBase()
 
 class VkBot:
     def __init__(self):
@@ -232,7 +222,8 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = 5):
+    def get_dating_users(self, user_id, offset = None):
+        global dating_dict
         try:
             daiting_user = self.vk2.method('users.search',
                                            {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
@@ -241,7 +232,6 @@ class VkBot:
                                             'offset': offset, 'fields': 'bdate, sex, city, relation', 'count': 30,
                                             'v': '5.131'})
             du_list = daiting_user['items']
-            # pprint(daiting_user)
             for i in du_list:
                 for key, value in i.items():
                     global vk_id, first_name, last_name
@@ -260,13 +250,33 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
+    def db(self):
+        global db_dusers
+        try:
+            # drop_users()
+            create_db()
+            create_users()
+            select_users()
+            db_dusers_list = select_users()
+            print(db_dusers_list)
+        except KeyError:
+            return
+
     def get_dating_user(self, user_id):
         global duser_id
         try:
             dating_list = self.get_dating_users(user_id)
             duser_id = dating_list[0]
-            photos_list = self.get_photos(duser_id)
-            return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
+            db_dusers_list = self.db()
+            print(db_dusers_list)
+            for i in db_dusers_list:
+                if i is None or i != duser_id:
+                    insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+                    pprint(db_dusers)
+                    photos_list = self.get_photos(duser_id)
+                    return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
+                else:
+                    self.next(user_id)
         # drop_users()
         # create_db()
         # create_users()
@@ -313,26 +323,6 @@ class VkBot:
 
         return ','.join(new_list)
 
-# if __name__ == '__main__':
-#     tools = VkBot(access_token)
-#     photos = tools.photos_get(user_id)
-#     print(photos)
-
-            # def photos_get(self, user_id):
-    #     photos = self.vk2.method('photos.get', {'album_id': 'profile', 'owner_id': user_id})
-    #     try:
-    #         photos = photos['items']
-    #     except KeyError:
-    #         return
-    #
-    #     result = []
-    #     for num, photo in enumerate(photos):
-    #         result.append({'owner_id': photo['owner_id'], 'id': photo['id']})
-    #         if num == 2:
-    #             break
-    #     return result
-    #     print(result)
-
     def hi(self, user_id):
         try:
             VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_user_name(user_id)}! Если хочешь подобрать пару - набери "начать поиск"')
@@ -353,7 +343,7 @@ class VkBot:
 
     def next(self, user_id):
         try:
-            VkBot.send_some_msg(user_id, f'{self.get_user_name(user_id)}, функция в разработке')
+            VkBot.get_dating_user(user_id)
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
