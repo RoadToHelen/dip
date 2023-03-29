@@ -27,9 +27,9 @@ def create_users():
         with connection.cursor() as cursor:
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS users(
-            vk_id VARCHAR(9) PRIMARY KEY,
-            first_name VARCHAR(20) NOT NULL,
-            last_name VARCHAR(20)
+            vk_id VARCHAR(20) PRIMARY KEY,
+            first_name VARCHAR(30) NOT NULL,
+            last_name VARCHAR(30)
             );
         ''')
         print('Table users created')
@@ -45,7 +45,7 @@ def insert_users(vk_id, first_name, last_name):
             VALUES
             ('%s', '%s', '%s');
             '''
-            % (vk_id, first_name, last_name),
+            % (vk_id, first_name, last_name,)
         )
         connection.commit()
         cursor.close()
@@ -58,25 +58,18 @@ def select_users():
     try:
         with connection.cursor() as cursor:
             cursor.execute('''SELECT * FROM users''')
-            print(cursor.fetchall())
+            result = cursor.fetchall()
+            return result
     except KeyError:
         return
 
 
-def check_users(duser_id):
+def select_duser_ids():
     try:
-        cursor = connection.cursor()
-        cursor.execute(
-            """
-                    SELECT vk_id
-                    FROM users
-                    WHERE duser_id):= '%s';
-                """
-            % duser_id
-        )
-        _data = cursor.fetchall()
-        cursor.close()
-        return _data
+        with connection.cursor() as cursor:
+            cursor.execute('''SELECT vk_id FROM users''')
+            result = cursor.fetchall()
+            return result
     except KeyError:
         return
 
