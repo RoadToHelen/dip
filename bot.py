@@ -308,15 +308,15 @@ class VkBot:
             select_users()
             select_duser_ids()
             print(select_duser_ids())
-            # check_users(duser_id)
-            # db_dusers_list = heck_users(duser_id)
-            # for i in db_dusers_list:
-            #     if i is None or i != duser_id:
-            #         insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-            #         photos_list = self.get_photos(duser_id)
-            #         return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
-            #     else:
-            #         self.next(user_id)
+            check_users(duser_id)
+            db_dusers_list = сheck_users(duser_id)
+            for i in db_dusers_list:
+                if i is None or i != duser_id:
+                    insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+                    photos_list = self.get_photos(duser_id)
+                    return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
+                else:
+                    self.next(user_id)
             # insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
             # photos_list = self.get_photos(duser_id)
             # return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}", photos_list)
