@@ -331,11 +331,6 @@ class VkBot:
             create_users()
             select_users()
             select_duser_ids()
-
-            # db_dusers = {int(vk_id[0]) for duser_id in checkes_users}
-            # if duser_id in db_dusers:
-            #     self.next(user_id)
-            # else:
             insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
             photos_list = self.get_photos(duser_id)
             self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}", photos_list)
