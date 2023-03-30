@@ -4,7 +4,7 @@ from pprint import pprint
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.exceptions import ApiError
-from database import create_db, create_users, select_users, insert_users, drop_users, select_duser_ids
+from database import create_db, create_users, select_users, insert_users, drop_users, select_duser_ids, check_users
 
 
 try:
@@ -132,47 +132,31 @@ class VkBot:
         except ApiError:
             return
 
-    def user_search(self, user_id, offset=None):
 
-        try:
-            profiles = self.vk2.method('users.search',
-                                       {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
-                                        'relation': 1 or 6, 'city_title': self.get_city(user_id),
-                                        'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5,
-                                        'friend_status': 0,
-                                        'has_photo': 1, 'offset': offset,
-                                        'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'})
-
-        except ApiError:
-            return
-
-        profiles = profiles['items']
-
-        result = []
-        for profile in profiles:
-            if profile['is_closed'] == False:
-                result.append({'name': profile['first_name'] + ' ' + profile['last_name'],
-                               'id': profile['id']
-                               })
-
-        return result
-
-        du_list = result['items']
-        for i in du_list:
-            for key, value in i.items():
-                global vk_id, first_name, last_name
-                vk_id = i.get('id')
-                first_name = i.get('first_name')
-                last_name = i.get('last_name')
-                is_closed = i.get('is_closed')
-                bdate = i.get('bdate')
-                city = i.get('city')
-                if city == self.get_city(user_id) and is_closed == False:
-                    dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name,
-                                   'city': str(city.get('title')), 'bdate': bdate}
-                    dating_list = (vk_id, first_name, last_name)
-                    return dating_list
-
+#     def user_serch(self, user_id, offset=None):
+#
+#         try:
+#             profiles = self.vk2.method('users.search',
+#                                        {'access_token': user_token, 'sex': self.get_daiting_sex(user_id),
+#                                         'relation': 1 or 6,
+#                                         'age_from': self.get_age(user_id) - 5, 'age_to': self.get_age(user_id) + 5,
+#                                         'friend_status': 0,
+#                                         'has_photo': 1, 'offset': offset,
+#                                         'fields': 'bdate, sex, city, relation', 'count': 30, 'v': '5.131'})
+#
+#         except ApiError:
+#             return
+#
+#         profiles = profiles['items']
+#
+#         result = []
+#         for profile in profiles:
+#             if profile['is_closed'] == False:
+#                 result.append({'name': profile['first_name'] + ' ' + profile['last_name'],
+#                                'id': profile['id']
+#                                })
+#
+#         return result
 #
 #
 #
@@ -266,75 +250,89 @@ class VkBot:
     #     offset += 30
     #     self.get_daiting_user(self, user_id, offset=offset)
 
-    def get_dating_users(self, user_id, offset = None):
+    def get_dating_users(self, user_id, offset = 75):
         global dating_dict
         try:
-            daiting_user = self.vk2.method('users.search',
-                                           {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
-                                            'relation': 6, 'age_from': self.get_age(user_id) - 5,
-                                            'age_to': self.get_age(user_id) + 5, 'friend_status': 0, 'has_photo': 1,
-                                            'offset': offset, 'fields': 'bdate, sex, city, relation', 'count': 30,
-                                            'v': '5.131'})
-            du_list = daiting_user['items']
-            for i in du_list:
+            dict_user_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
+            for i in dict_user_info:
                 for key, value in i.items():
-                    global vk_id, first_name, last_name
-                    vk_id = i.get('id')
-                    first_name = i.get('first_name')
-                    last_name = i.get('last_name')
-                    is_closed = i.get('is_closed')
                     bdate = i.get('bdate')
                     city = i.get('city')
-                    if city == self.get_city(user_id) and is_closed == False:
-                        dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name,
-                                       'city': str(city.get('title')), 'bdate': bdate}
-                        dating_list = (vk_id, first_name, last_name)
-                        return dating_list
+                    if (bdate is None and city is None) or (request == 'нет'):
+                        data = self.get_user_data(user_id)
+                        daiting_user = self.vk2.method('users.search',
+                                                       {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
+                                                        'relation': 6, 'age_from': data['age_from'],
+                                                        'age_to': data['age_to'], 'city': data['city'], 'friend_status': 0, 'has_photo': 1,
+                                                        'offset': offset, 'fields': 'bdate, sex, city, relation', 'count': 30,
+                                                        'v': '5.131'})
+                        print(daiting_user)
+                    else:
+                        daiting_user = self.vk2.method('users.search',
+                                                       {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
+                                                        'relation': 6, 'age_from': self.get_age(user_id) - 5,
+                                                        'age_to': self.get_age(user_id) + 5, 'friend_status': 0,
+                                                        'has_photo': 1,
+                                                        'offset': offset, 'fields': 'bdate, sex, city, relation',
+                                                        'count': 30,
+                                                        'v': '5.131'})
+                    du_list = daiting_user['items']
+                    for i in du_list:
+                        for key, value in i.items():
+                            global vk_id, first_name, last_name
+                            vk_id = i.get('id')
+                            first_name = i.get('first_name')
+                            last_name = i.get('last_name')
+                            is_closed = i.get('is_closed')
+                            bdate = i.get('bdate')
+                            city = i.get('city')
+                            if city == self.get_city(user_id) and is_closed == False:
+                                dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name,
+                                               'city': str(city.get('title')), 'bdate': bdate}
+                                dating_list = (vk_id, first_name, last_name)
+                                return dating_list
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
-
-    # def get_dating_user1(self, user_id):
-    #     global duser_id
-    #     try:
-    #         dating_list = self.user_search(user_id)
-    #         duser_id = dating_list[0]
-    #         user_list = self.get_user_info(user_id)
-    #         user = user_list[0]
-    #         print(user)
-    #         # drop_users()
-    #         create_db()
-    #         create_users()
-    #         select_users()
-    #         select_duser_ids()
-    #
-    #         # db_dusers = {int(vk_id[0]) for duser_id in checkes_users}
-    #         # if duser_id in db_dusers:
-    #         #     self.next(user_id)
-    #         # else:
-    #         insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-    #         photos_list = self.get_photos(duser_id)
-    #         self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}", photos_list)
-    #
-    #     except ApiError:
-    #         return
 
     def get_dating_user(self, user_id):
         global duser_id
         try:
             dating_list = self.get_dating_users(user_id)
             duser_id = dating_list[0]
-            user_list = self.get_user_info(user_id)
-            user = user_list[0]
-            print(user)
+            # user_list = self.get_user_info(user_id)
+            # user = user_list[0]
+            # print(user)
             # drop_users()
             create_db()
             create_users()
             select_users()
             select_duser_ids()
-            insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
-            photos_list = self.get_photos(duser_id)
-            self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}", photos_list)
-
+            print(select_duser_ids())
+            # check_users(duser_id)
+            # db_dusers_list = heck_users(duser_id)
+            # for i in db_dusers_list:
+            #     if i is None or i != duser_id:
+            #         insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+            #         photos_list = self.get_photos(duser_id)
+            #         return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
+            #     else:
+            #         self.next(user_id)
+            # insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+            # photos_list = self.get_photos(duser_id)
+            # return self.send_some_msg(user_id, f"{dating_dict['first_name']} {dating_dict['last_name']} {dating_dict['city']}", photos_list)
+            # for i in db_dusers_list:
+            #     if i is None or i != duser_id:
+            #         insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
+            #         photos_list = self.get_photos(duser_id)
+            #         return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
+            #     else:
+            #         self.next(user_id)
+        # drop_users()
+        # create_db()
+        # create_users()
+        # select_users()
+        # return self.send_photos(user_id, f'photo{duser_id}_{photo1, photo2, photo3}')
+        # return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', self.send_photos(user_id, photo{duser_id}_{photos_list}))
 
         # db_dusers = select_users()
         #     for i in db_dusers:
@@ -357,8 +355,6 @@ class VkBot:
 
     # if __name__ == '__main__':
     #     print('вход bot.py')
-
-
 
     def get_photos(self, duser_id):
         try:
@@ -383,34 +379,15 @@ class VkBot:
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
-    def start_search(self, user_id):
-        try:
-            VkBot.get_daiting_user_info(user_id)
-            for event in VkBot.longpoll.listen():
-                if event.type == VkEventType.MESSAGE_NEW and event.to_me:
-                    request = event.text.lower()
-                    user_id = str(event.user_id)
-                    if request == 'да':
-                        VkBot.yes(user_id)
-                    elif request == 'нет':
-                        VkBot.no(user_id)
-                    elif request == 'еще':
-                        VkBot.next(user_id)
-                    else:
-                        VkBot.unclear(user_id)
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
-
-
     def yes(self, user_id):
         try:
-            VkBot.send_some_msg(user_id, f'{VkBot.user_search(user_id)}')
+            VkBot.send_some_msg(user_id, f'{VkBot.get_dating_user(user_id)}')
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
     def no(self, user_id):
         try:
-            VkBot.send_some_msg(user_id, f'{VkBot.get_dating_user(user_id)}')
+            VkBot.send_some_msg(user_id, f'{VkBot.get_user_data(user_id)}')
         except KeyError:
             self.send_some_msg(user_id, 'Ошибка')
 
@@ -449,7 +426,11 @@ for event in VkBot.longpoll.listen():
         if request == 'привет':
             VkBot.hi(user_id)
         elif request == 'начать поиск':
-            VkBot.start_search(user_id)
+            VkBot.get_daiting_user_info(user_id)
+        elif request == 'да':
+            VkBot.yes(user_id)
+        elif request == 'нет':
+            VkBot.no(user_id)
         elif request == 'кто я':
             VkBot.who(user_id)
         elif request == 'пока':
