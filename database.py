@@ -74,11 +74,17 @@ def select_duser_ids():
         return
 
 
-def select_dusers_ids():
+def check_users(duser_id):
     try:
-        with connection.cursor() as cursor:
-            cursor.execute('''SELECT vk_id FROM users''')
-            print(cursor.fetchall())
+        cursor = connection.cursor()
+        cursor.execute('''
+                    SELECT vk_id FROM users WHERE vk_id == duser_id 
+                    ('%s');
+                '''
+            % (duser_id)
+        )
+        print(cursor.fetchall())
+        cursor.close()
     except KeyError:
         return
 
