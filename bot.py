@@ -299,17 +299,20 @@ class VkBot:
         try:
             dating_list = self.get_dating_users(user_id)
             duser_id = dating_list[0]
+            print(duser_id)
             # user_list = self.get_user_info(user_id)
             # user = user_list[0]
             # print(user)
             # drop_users()
             create_db()
             create_users()
-            select_users()
-            select_duser_ids()
-            print(select_duser_ids())
-            check_users(duser_id)
-            db_dusers_list = сheck_users(duser_id)
+            # select_users()
+            # select_duser_ids()
+            # print(select_duser_ids())
+            # check_users(duser_id[0])
+            db_dusers_list = check_users(str(dating_list[0]))
+            # checkes_users = check_users(str(dating_list[0])
+            # db_dusers_list = {str(dating_list[0]) for duser_id in checkes_users}
             for i in db_dusers_list:
                 if i is None or i != duser_id:
                     insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
