@@ -27,7 +27,7 @@ def create_users():
         with connection.cursor() as cursor:
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS users(
-            vk_id VARCHAR(20) PRIMARY KEY,
+            vk_id INTEGER PRIMARY KEY,
             first_name VARCHAR(30) NOT NULL,
             last_name VARCHAR(30)
             );
@@ -77,9 +77,13 @@ def select_duser_ids():
 def check_users(duser_id):
     try:
         cursor = connection.cursor()
-        cursor.execute('''SELECT vk_id FROM users WHERE vk_id ==  ('%s');''',  duser_id)
-        print(cursor.fetchall())
+        cursor.execute('''SELECT vk_id
+                        FROM users WHERE 
+                        vk_id ==  '%s';''',
+                       duser_id)
+        out = cursor.fetchall()
         cursor.close()
+        return out
     except KeyError:
         return
 
