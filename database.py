@@ -77,10 +77,7 @@ def select_duser_ids():
 def check_users(duser_id):
     try:
         cursor = connection.cursor()
-        cursor.execute('''SELECT vk_id
-                        FROM users WHERE 
-                        vk_id ==  '%s';''',
-                       duser_id)
+        cursor.execute(f'''SELECT vk_id FROM users WHERE vk_id ={duser_id};''')
         out = cursor.fetchall()
         cursor.close()
         return out
@@ -110,3 +107,4 @@ def drop_db_users():
             print('Database users deleted')
     except KeyError:
         return
+
