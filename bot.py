@@ -29,16 +29,18 @@ class VkBot:
     def get_user_name(self, user_id):
         try:
             dict_user_name = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'v': '5.131'})
+        except ApiError:
+            self.send_some_msg(user_id, 'Ошибка')
             for i in dict_user_name:
                 for key, value in i.items():
                     first_name = i.get('first_name')
                     return first_name
-        except ApiError:
-            return
 
     def get_user_info(self, user_id):
         try:
             dict_user_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
+        except ApiError:
+            self.send_some_msg(user_id, 'Ошибка')
             for i in dict_user_info:
                 for key, value in i.items():
                     first_name = i.get('first_name')
@@ -54,12 +56,12 @@ class VkBot:
                     # user_dict = {'first_name': first_name, 'last_name': last_name, 'bdate': bdate, 'city': str(city.get('title')), 'sex': sex, 'relation': relation}
                     user_list = [user_id, first_name, last_name, bdate, str(city.get('title')), sex, relation]
                     return user_list
-        except ApiError:
-            return
 
     def get_daiting_user_info(self, user_id):
         try:
             dict_duser_info = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate, city, sex, relation', 'v': '5.131'})
+        except ApiError:
+            self.send_some_msg(user_id, 'Ошибка')
             for i in dict_duser_info:
                 for key, value in i.items():
                     bdate = i.get('bdate')
@@ -101,8 +103,6 @@ class VkBot:
                     dating_user_dict = {'age from': (age - 5), 'age to': (age + 5), 'city': str(city.get('title')),
                                         'sex': sex_name, 'sex_find': sex_find}
                     return self.send_some_msg(user_id, f"{self.get_user_name(user_id)}, ищем {dating_user_dict['sex']} от {dating_user_dict['age from']} до {dating_user_dict['age to']} лет из города {dating_user_dict['city']}?")
-        except ApiError:
-            return
 
     def get_bdate(self, user_id):
         self.send_some_msg(user_id, 'Введите свою дату рождения в формате дд.мм.гггг: ')
@@ -129,6 +129,8 @@ class VkBot:
     def get_dating_sex(self, user_id):
         try:
             dating_sex_dict = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'sex', 'v': '5.131'})
+        except ApiError:
+            self.send_some_msg(user_id, 'Ошибка')
             for i in dating_sex_dict:
                 for key, value in i.items():
                     sex = i.get('sex')
@@ -138,12 +140,12 @@ class VkBot:
                     elif sex == 2:
                         find = 1
                         return find
-        except ApiError:
-            self.send_some_msg(user_id, 'Ошибка')
 
     def get_age(self, user_id):
         try:
             age_dict = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'bdate', 'v': '5.131'})
+        except ApiError:
+            self.send_some_msg(user_id, 'Ошибка')
             for i in age_dict:
                 for key, value in i.items():
                     bdate = i.get('bdate')
@@ -159,25 +161,26 @@ class VkBot:
                         year_today = int(datetime.date.today().year)
                         if month_today > bmonth:
                             age = year_today - byear
+                            return age
                         elif (month_today == bmonth and bday > day_today) or (month_today == bmonth and bday > day_today):
                             age = year_today - byear
+                            return age
                         else:
                             age = year_today - byear - 1
                             return age
-        except ApiError:
-            self.send_some_msg(user_id, 'Ошибка')
 
     def get_city(self, user_id):
         try:
             city_dict = self.vk2.method('users.get', {'access_token': user_token, 'user_ids': user_id, 'fields': 'city', 'v': '5.131'})
+        except ApiError:
+            self.send_some_msg(user_id, 'Ошибка')
             for i in city_dict:
                 for key, value in i.items():
                     city = i.get('city')
                     return city
-        except ApiError:
-            self.send_some_msg(user_id, 'Ошибка')
 
-    def get_dating_users(self, user_id, offset = 154):
+
+    def get_dating_users(self, user_id, offset = 164):
         global dating_dict
         try:
             daiting_user = self.vk2.method('users.search',
@@ -186,6 +189,8 @@ class VkBot:
                                             'age_to': self.get_age(user_id) + 5, 'friend_status': 0, 'has_photo': 1,
                                             'offset': offset, 'fields': 'bdate, sex, city, relation', 'count': 30,
                                             'v': '5.131'})
+        except ApiError:
+            self.send_some_msg(user_id, 'Ошибка')
             du_list = daiting_user['items']
             for i in du_list:
                 for key, value in i.items():
@@ -202,13 +207,12 @@ class VkBot:
                         dating_list = (vk_id, first_name, last_name)
                         return dating_list
 
-        except ApiError:
-            self.send_some_msg(user_id, 'Ошибка')
-
     def get_dating_user(self, user_id):
         global duser_id
         try:
             dating_list = self.get_dating_users(user_id)
+        except ApiError:
+            self.send_some_msg(user_id, 'Ошибка')
             duser_id = dating_list[0]
             # drop_users()
             create_db()
@@ -222,9 +226,6 @@ class VkBot:
                 return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
             else:
                 self.next(user_id)
-
-        except ApiError:
-            return
 
     if __name__ == '__main__':
         print('вход bot.py')
