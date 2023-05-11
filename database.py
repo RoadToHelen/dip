@@ -23,66 +23,53 @@ connection.autocommit = True
 
 
 def create_users():
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('''
+    with connection.cursor() as cursor:
+        cursor.execute('''
             CREATE TABLE IF NOT EXISTS users(
             vk_id INTEGER PRIMARY KEY,
             first_name VARCHAR(30) NOT NULL,
             last_name VARCHAR(30)
             );
-        ''')
+            ''')
         print('Table users created')
-    except KeyError:
         return
 
 
 def insert_users(vk_id, first_name, last_name):
-    try:
-        cursor = connection.cursor()
-        cursor.execute('''
-            INSERT INTO users(vk_id, first_name, last_name)
-            VALUES
-            ('%s', '%s', '%s');
-            '''
-            % (vk_id, first_name, last_name,)
-        )
-        connection.commit()
-        cursor.close()
-        print('user added at table')
-    except KeyError:
-        return
+    cursor = connection.cursor()
+    cursor.execute('''
+        INSERT INTO users(vk_id, first_name, last_name)
+        VALUES
+        ('%s', '%s', '%s');
+        '''
+        % (vk_id, first_name, last_name,)
+    )
+    connection.commit()
+    cursor.close()
+    print('user added at table')
 
 
 def select_users():
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('''SELECT * FROM users''')
-            result = cursor.fetchall()
-            return result
-    except KeyError:
-        return
+    with connection.cursor() as cursor:
+        cursor.execute('''SELECT * FROM users''')
+        result = cursor.fetchall()
+        return result
 
 
 def select_duser_ids():
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('''SELECT vk_id FROM users''')
-            result = cursor.fetchall()
-            return result
-    except KeyError:
-        return
+    with connection.cursor() as cursor:
+        cursor.execute('''SELECT vk_id FROM users''')
+        result = cursor.fetchall()
+        return result
 
 
 def check_users(duser_id):
-    try:
-        cursor = connection.cursor()
-        cursor.execute(f'''SELECT vk_id FROM users WHERE vk_id ={duser_id};''')
-        out = cursor.fetchall()
-        cursor.close()
-        return out
-    except KeyError:
-        return
+    cursor = connection.cursor()
+    cursor.execute(f'''SELECT vk_id FROM users WHERE vk_id ={duser_id};''')
+    out = cursor.fetchall()
+    cursor.close()
+    return out
+
 
 
 def drop_users():
@@ -93,18 +80,13 @@ def drop_users():
             '''
             )
             print('Table users deleted')
-    except KeyError:
-        return
 
 
 def drop_db_users():
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('''
-            DROP DATABASE IF EXISTS users;
-            '''
-            )
-            print('Database users deleted')
-    except KeyError:
-        return
+    with connection.cursor() as cursor:
+        cursor.execute('''
+        DROP DATABASE IF EXISTS users;
+        '''
+        )
+        print('Database users deleted')
 
