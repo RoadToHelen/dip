@@ -180,7 +180,7 @@ class VkBot:
                 return city
 
 
-    def get_dating_users(self, user_id, offset = 164):
+    def get_dating_users(self, user_id, offset = 194):
         global dating_dict
         try:
             daiting_user = self.vk2.method('users.search',
@@ -227,6 +227,13 @@ class VkBot:
         else:
             self.next(user_id)
 
+    def get_dating(self, user_id):
+        dating_list = self.get_dating_users(user_id)
+        my_item = dating_list.pop()
+        duser_id = dating_list[0]
+        photos_list = self.get_photos(duser_id)
+        return self.send_some_msg(user_id, f'{my_item[1]} {my_item[2]}', photos_list)
+
     if __name__ == '__main__':
         print('вход bot.py')
 
@@ -257,7 +264,7 @@ class VkBot:
             VkBot.send_some_msg(user_id, f'Твои данные: {VkBot.get_user_info(user_id)}')
 
     def next(self, user_id):
-            VkBot.get_dating_user(user_id)
+            VkBot.get_dating(user_id)
 
     def unclear(self, user_id):
             VkBot.send_some_msg(user_id, f'{self.get_user_name(user_id)}, твое сообщение мне не понятно, набери новое, пожалуйста.')
