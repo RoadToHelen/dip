@@ -73,13 +73,12 @@ def check_users(duser_id):
 
 
 def drop_users():
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute('''
-            DROP TABLE IF EXISTS users;
-            '''
-            )
-            print('Table users deleted')
+    with connection.cursor() as cursor:
+        cursor.execute('''
+        DROP TABLE IF EXISTS users;
+        '''
+        )
+        print('Table users deleted')
 
 
 def drop_db_users():
@@ -89,4 +88,3 @@ def drop_db_users():
         '''
         )
         print('Database users deleted')
-
