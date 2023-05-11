@@ -118,8 +118,10 @@ class VkBot:
                 year_today = int(datetime.date.today().year)
                 if month_today > bmonth:
                     age = year_today - byear
+                    return age
                 elif (month_today == bmonth and bday > day_today) or (month_today == bmonth and bday > day_today):
                     age = year_today - byear
+                    return age
                 else:
                     age = year_today - byear - 1
                     return age
@@ -136,7 +138,7 @@ class VkBot:
                     elif sex == 2:
                         find = 1
                         return find
-        except KeyError:
+        except ApiError:
             self.send_some_msg(user_id, 'Ошибка')
 
     def get_age(self, user_id):
@@ -162,7 +164,7 @@ class VkBot:
                         else:
                             age = year_today - byear - 1
                             return age
-        except KeyError:
+        except ApiError:
             self.send_some_msg(user_id, 'Ошибка')
 
     def get_city(self, user_id):
@@ -172,10 +174,10 @@ class VkBot:
                 for key, value in i.items():
                     city = i.get('city')
                     return city
-        except KeyError:
+        except ApiError:
             self.send_some_msg(user_id, 'Ошибка')
 
-    def get_dating_users(self, user_id, offset = 134):
+    def get_dating_users(self, user_id, offset = 154):
         global dating_dict
         try:
             daiting_user = self.vk2.method('users.search',
@@ -200,7 +202,7 @@ class VkBot:
                         dating_list = (vk_id, first_name, last_name)
                         return dating_list
 
-        except KeyError:
+        except ApiError:
             self.send_some_msg(user_id, 'Ошибка')
 
     def get_dating_user(self, user_id):
@@ -221,7 +223,7 @@ class VkBot:
             else:
                 self.next(user_id)
 
-        except KeyError:
+        except ApiError:
             return
 
     if __name__ == '__main__':
@@ -232,7 +234,7 @@ class VkBot:
             photos = self.vk2.method('photos.get', {'access_token': user_token, 'album_id': 'profile', 'owner_id': duser_id, 'extended': 1, 'count': 3,  'v': '5.131'})
             photos_list = photos['items']
             # pprint(photos_list)
-        except KeyError:
+        except ApiError:
             return
 
         sorted_photos = sorted(photos_list, key=lambda x: x['likes']['count'], reverse=True)[:3]
@@ -245,40 +247,23 @@ class VkBot:
         return ','.join(new_list)
 
     def hi(self, user_id):
-        try:
             VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_user_name(user_id)}! Если хочешь подобрать пару - набери "начать поиск"')
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
 
     def yes(self, user_id):
-        try:
             VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_dating_user(user_id)}')
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
 
     def who(self, user_id):
-        try:
             VkBot.send_some_msg(user_id, f'Твои данные: {VkBot.get_user_info(user_id)}')
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
 
     def next(self, user_id):
-        try:
             VkBot.get_dating_user(user_id)
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
 
     def unclear(self, user_id):
-        try:
             VkBot.send_some_msg(user_id, f'{self.get_user_name(user_id)}, твое сообщение мне не понятно, набери новое, пожалуйста.')
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
 
     def bye(self, user_id):
-        try:
             VkBot.send_some_msg(user_id, f'Пока, {VkBot.get_user_name(user_id)}! До новых встреч!')
-        except KeyError:
-            self.send_some_msg(user_id, 'Ошибка')
+
 
 
 VkBot = VkBot()
