@@ -180,18 +180,26 @@ class VkBot:
                 return city
 
 
-    def get_dating_users(self, user_id, offset = 194):
-        global dating_dict
+    def get_dating_users(self, user_id, offset = 0):
         try:
-            daiting_user = self.vk2.method('users.search',
+            daiting_users = self.vk2.method('users.search',
                                            {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
-                                            'relation': 6, 'age_from': self.get_age(user_id) - 5,
+                                            'status': 6, 'age_from': self.get_age(user_id) - 5,
                                             'age_to': self.get_age(user_id) + 5, 'friend_status': 0, 'has_photo': 1,
                                             'offset': offset, 'fields': 'bdate, sex, city, relation', 'count': 30,
                                             'v': '5.131'})
         except ApiError:
             self.send_some_msg(user_id, 'Ошибка')
-        du_list = daiting_user['items']
+        du_list = daiting_users['items']
+        return du_list
+
+    def user_params(self, user_id):
+        dating_user_list = []
+        try:
+            du_list = self.get_dating_users(user_id)
+        except ApiError:
+            self.send_some_msg(user_id, 'Ошибка')
+
         for i in du_list:
             for key, value in i.items():
                 global vk_id, first_name, last_name
@@ -202,24 +210,25 @@ class VkBot:
                 bdate = i.get('bdate')
                 city = i.get('city')
                 if city == self.get_city(user_id) and is_closed == False:
-                    dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name,
-                                   'city': str(city.get('title')), 'bdate': bdate}
-                    dating_list = (vk_id, first_name, last_name)
-                    return dating_list
+                    dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name}
+                    dating_user_list.append(dating_dict)
+        return dating_user_list
+        pprint(dating_user_list)
 
     def get_dating_user(self, user_id):
-        global duser_id
         try:
-            dating_list = self.get_dating_users(user_id)
+            dating_list = self.user_params(user_id)
         except ApiError:
             self.send_some_msg(user_id, 'Ошибка')
-        duser_id = dating_list[0]
+
+        duser = dating_list[-1]
+        duser_id = duser[0]
         # drop_users()
         create_db()
         create_users()
         select_users()
         checkes_users = check_users(duser_id)
-        check = {int(vk_id[0]) for duser_id in checkes_users}
+        check = {str(duser[0]) for duser_id in checkes_users}
         if not check:
             insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
             photos_list = self.get_photos(duser_id)
@@ -227,12 +236,12 @@ class VkBot:
         else:
             self.next(user_id)
 
-    def get_dating(self, user_id):
-        dating_list = self.get_dating_users(user_id)
-        my_item = dating_list.pop()
-        duser_id = dating_list[0]
-        photos_list = self.get_photos(duser_id)
-        return self.send_some_msg(user_id, f'{my_item[1]} {my_item[2]}', photos_list)
+    # def get_dating(self, user_id):
+    #     dating_list = self.get_dating_users(user_id)
+    #     my_item = dating_list.pop()
+    #     duser_id = dating_list[0]
+    #     photos_list = self.get_photos(duser_id)
+    #     return self.send_some_msg(user_id, f'{my_item[1]} {my_item[2]}', photos_list)
 
     if __name__ == '__main__':
         print('вход bot.py')
