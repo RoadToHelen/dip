@@ -180,42 +180,44 @@ class VkBot:
                 return city
 
 
-    def get_dating_users(self, user_id, offset = 0):
+    def get_dating_users(self, user_id, offset = 194):
+        global dating_dict
         try:
-            daiting_users = self.vk2.method('users.search',
-                                           {'access_token': user_token, 'sex': self.get_dating_sex(user_id), 'city': self.get_city(user_id),
-                                            'status': 6, 'age_from': self.get_age(user_id) - 5,
+            daiting_user = self.vk2.method('users.search',
+                                           {'access_token': user_token, 'sex': self.get_dating_sex(user_id),
+                                            'relation': 6, 'age_from': self.get_age(user_id) - 5,
                                             'age_to': self.get_age(user_id) + 5, 'friend_status': 0, 'has_photo': 1,
-                                            'offset': offset, 'fields': 'bdate, sex, city, relation', 'count': 50,
+                                            'offset': offset, 'fields': 'bdate, sex, city, relation', 'count': 30,
                                             'v': '5.131'})
         except ApiError:
             self.send_some_msg(user_id, 'Ошибка')
-            return []
-
-        for i in daiting_users.get['items']:
-            dating_user_list = []
+        du_list = daiting_user['items']
+        dating_list = []
+        for i in du_list:
             for key, value in i.items():
-            #     global vk_id, first_name, last_name
+                global vk_id, first_name, last_name
                 vk_id = i.get('id')
                 first_name = i.get('first_name')
                 last_name = i.get('last_name')
                 is_closed = i.get('is_closed')
                 bdate = i.get('bdate')
                 city = i.get('city')
-            dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name}
-            dating_user_list.append(dating_dict)
-            if is_closed == False:
-                dating_list = dating_user_list
-                print(dating_list)
+                if city == self.get_city(user_id) and is_closed == False:
+                    dating_dict = {'vk_id': vk_id, 'first_name': first_name, 'last_name': last_name,
+                                   'city': str(city.get('title')), 'bdate': bdate}
+                    if i not in dating_list:
+                        dating_list.append(dating_dict)
+                    # (vk_id, first_name, last_name)
+        return dating_list
 
     def get_dating_user(self, user_id):
+        global duser_id
         try:
             dating_list = self.get_dating_users(user_id)
         except ApiError:
             self.send_some_msg(user_id, 'Ошибка')
-
-        duser = dating_list[0]
-        duser_id = duser.get(0)
+        duser = dating_list[-1]
+        duser_id = duser[0]
         # drop_users()
         create_db()
         create_users()
@@ -223,32 +225,18 @@ class VkBot:
         checkes_users = check_users(duser_id)
         check = {str(dating_list[0]) for duser_id in checkes_users}
         if not check:
-            insert_users(dating_list['vk_id'], dating_list['first_name'], dating_list['last_name'])
+            insert_users(dating_dict['vk_id'], dating_dict['first_name'], dating_dict['last_name'])
             photos_list = self.get_photos(duser_id)
             return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
         else:
             self.next(user_id)
 
     def get_dating(self, user_id):
-       # offset +=  30
         dating_list = self.get_dating_users(user_id)
-        # my_item = dating_list.pop()
-        duser = dating_list[0]
-        duser_id = duser.get(0)
-        create_db()
-        create_users()
-        select_users()
-        checkes_users = check_users(duser_id)
-        check = {str(dating_list[0]) for duser_id in checkes_users}
-        if not check:
-            insert_users(dating_list['vk_id'], dating_list['first_name'], dating_list['last_name'])
-            photos_list = self.get_photos(duser_id)
-            return self.send_some_msg(user_id, f'{dating_list[1]} {dating_list[2]}', photos_list)
-        else:
-            self.next(user_id)
-        # duser_id = dating_list[0]
-        # photos_list = self.get_photos(duser_id)
-        # return self.send_some_msg(user_id, f'{my_item[1]} {my_item[2]}', photos_list)
+        my_item = dating_list.pop()
+        duser_id = dating_list[0]
+        photos_list = self.get_photos(duser_id)
+        return self.send_some_msg(user_id, f'{my_item[1]} {my_item[2]}', photos_list)
 
     if __name__ == '__main__':
         print('вход bot.py')
@@ -271,22 +259,22 @@ class VkBot:
         return ','.join(new_list)
 
     def hi(self, user_id):
-            self.send_some_msg(user_id, f'Привет, {self.get_user_name(user_id)}! Если хочешь подобрать пару - набери "начать поиск"')
+            VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_user_name(user_id)}! Если хочешь подобрать пару - набери "начать поиск"')
 
     def yes(self, user_id):
-            self.send_some_msg(user_id, f'Привет, {self.get_dating_user(user_id)}')
+            VkBot.send_some_msg(user_id, f'Привет, {VkBot.get_dating_users(user_id)}')
 
     def who(self, user_id):
-            self.send_some_msg(user_id, f'Твои данные: {self.get_user_info(user_id)}')
+            VkBot.send_some_msg(user_id, f'Твои данные: {VkBot.get_user_info(user_id)}')
 
     def next(self, user_id):
-            self.get_dating(user_id)
+            VkBot.get_dating(user_id)
 
     def unclear(self, user_id):
-            self.send_some_msg(user_id, f'{self.get_user_name(user_id)}, твое сообщение мне не понятно, набери новое, пожалуйста.')
+            VkBot.send_some_msg(user_id, f'{self.get_user_name(user_id)}, твое сообщение мне не понятно, набери новое, пожалуйста.')
 
     def bye(self, user_id):
-            self.send_some_msg(user_id, f'Пока, {self.get_user_name(user_id)}! До новых встреч!')
+            VkBot.send_some_msg(user_id, f'Пока, {VkBot.get_user_name(user_id)}! До новых встреч!')
 
 
 
