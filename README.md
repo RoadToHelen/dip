@@ -1,6 +1,4 @@
-Внести свой токен в user_token.txt
-
-Внести токен группы в group_token.txt
+Внести user_token, group_token в config.py
 
 requirements.txt - версии библиотек, используемых в проекте
 Документация:https://learn.microsoft.com/ru-ru/VisualStudio/python/managing-required-packages-with-requirements-txt?view=vs-2022
