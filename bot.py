@@ -1,10 +1,7 @@
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
-from vk_api.exceptions import ApiError
 from random import randrange
 from vk_api.utils import get_random_id
-from datetime import datetime
-from pprint import pprint
 from database import create_db, create_users, select_users, insert_users, drop_users, check_users
 from config import group_token, user_token
 from core import VkTools
@@ -38,7 +35,14 @@ class BotInterface:
                 elif command == 'поиск':
                     users = self.api.serch_users(self.params)
                     user = users.pop()
-                    # здесь логика дял проверки бд
+
+                    # здесь логика для проверки бд
+                    # create_db()
+                    # create_users()
+                    # select_users()
+                    # checkes_users = check_users(user['id'])
+                    # check = {str(dating_list[0]) for user['id'] in checkes_users}
+                    # if not check:
                     photos_user = self.api.get_photos(user['id'])
 
                     self.message_send(event.user_id,
@@ -46,6 +50,8 @@ class BotInterface:
                                       photos_user
                                       )
                     # здесь логика для добавленяи в бд
+                    #insert_users(user['id'], dating_dict['first_name'], dating_dict['last_name'])
+
                 elif command == 'пока':
                     self.message_send(event.user_id, f'до новых встреч!')
                 else:
