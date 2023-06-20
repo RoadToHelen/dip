@@ -1,18 +1,25 @@
 import vk_api
 from datetime import datetime
 from config import user_token
+from vk_api.exceptions import ApiError
+from datetime import datetime
+from pprint import pprint
 
 class VkTools():
     def __init__(self, user_token):
         self.api = vk_api.VkApi(token=user_token)
 
     def get_profile_info(self, user_id):
+        try:
+            info, = self.api.method('users.get',
+                                    {'user_id': user_id,
+                                     'fields': 'city,bdate,sex,relation,home_town'
+                                     }
+                                    )
+        except ApiError as e:
+            info = {}
+            print(f'error = {e}')
 
-        info, = self.api.method('users.get',
-                                {'user_id': user_id,
-                                 'fields': 'city,bdate,sex,relation,home_town'
-                                 }
-                                )
         user_info = {'name': info['first_name'] + ' ' + info['last_name'],
                      'id': info['id'],
                      'bdate': info['bdate'] if 'bdate' in info else None,
@@ -32,17 +39,24 @@ class VkTools():
         age_from = age - 5
         age_to = age + 5
 
-        users = self.api.method('users.search',
-                                {'count': 30,
-                                 'offset': 0,
-                                 'age_from': age_from,
-                                 'age_to': age_to,
-                                 'sex': sex,
-                                 'city': city,
-                                 'status': 6,
-                                 'is_closed': False
-                                 }
-                                )
+        try:
+            users = self.api.method('users.search',
+                                    {'count': 30,
+                                     'offset': 0,
+                                     'age_from': age_from,
+                                     'age_to': age_to,
+                                     'sex': sex,
+                                     'city': city,
+                                     'status': 6,
+                                     'is_closed': False
+                                     }
+                                    )
+        except ApiError as e:
+            users = []
+            print(f'error = {e}')
+
+        pprint(users)
+
         try:
             users = users['items']
         except KeyError:
