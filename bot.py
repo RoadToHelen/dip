@@ -37,25 +37,26 @@ class BotInterface:
                     user = users.pop()
 
                     # здесь логика для проверки бд
-                    # create_db()
-                    # create_users()
-                    # select_users()
+                    create_db()
+                    create_users()
+                    select_users()
                     # checkes_users = check_users(user['id'])
                     # check = {str(dating_list[0]) for user['id'] in checkes_users}
                     # if not check:
-                    photos_user = self.api.get_photos(user['id'])
+                    photos_user = self.api.get_photos(user['vk_id'])
 
                     self.message_send(event.user_id,
-                                      f'Встречайте -  {user["name"]}',
+                                      f'Встречайте -  {user["first_name"]} {user["last_name"]}',
                                       photos_user
                                       )
                     # здесь логика для добавленяи в бд
-                    #insert_users(user['id'], dating_dict['first_name'], dating_dict['last_name'])
+                    insert_users(user['vk_id'], user['first_name'],  user['last_name'])
+                    print(user['vk_id'], user['first_name'],  user['last_name'])
 
                 elif command == 'пока':
-                    self.message_send(event.user_id, f'до новых встреч!')
+                    self.message_send(event.user_id, f'До новых встреч!')
                 else:
-                    self.message_send(event.user_id, f'твое сообщение мне не понятно, набери новое, пожалуйста.')
+                    self.message_send(event.user_id, f'Твое сообщение мне не понятно, набери новое, пожалуйста.')
 
 if __name__ == '__main__':
     bot = BotInterface(group_token, user_token)
