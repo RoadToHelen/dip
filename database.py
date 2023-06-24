@@ -42,7 +42,7 @@ def insert_users(vk_id, first_name, last_name):
         VALUES
         ('%s', '%s', '%s');
         '''
-        % (vk_id, first_name, last_name,)
+        % (vk_id, first_name, last_name)
     )
     connection.commit()
     cursor.close()
@@ -54,37 +54,3 @@ def select_users():
         cursor.execute('''SELECT * FROM users''')
         result = cursor.fetchall()
         return result
-
-
-def select_duser_ids():
-    with connection.cursor() as cursor:
-        cursor.execute('''SELECT vk_id FROM users''')
-        result = cursor.fetchall()
-        return result
-
-
-def check_users(duser_id):
-    cursor = connection.cursor()
-    cursor.execute(f'''SELECT vk_id FROM users WHERE vk_id ={duser_id};''')
-    out = cursor.fetchall()
-    cursor.close()
-    return out
-
-
-
-def drop_users():
-    with connection.cursor() as cursor:
-        cursor.execute('''
-        DROP TABLE IF EXISTS users;
-        '''
-        )
-        print('Table users deleted')
-
-
-def drop_db_users():
-    with connection.cursor() as cursor:
-        cursor.execute('''
-        DROP DATABASE IF EXISTS users;
-        '''
-        )
-        print('Database users deleted')
