@@ -55,23 +55,21 @@ class VkTools():
             users = []
             print(f'error = {e}')
 
-        pprint(users)
+        # pprint(users)
 
         try:
             users = users['items']
         except KeyError:
             return []
 
-        res = []
+        users_list = []
 
         for user in users:
             if user['is_closed'] == False:
-                res.append({'id': user['id'],
-                            'name': user['first_name'] + ' ' + user['last_name']
-                            }
-                           )
+                users_list.append({'vk_id': user['id'], 'first_name': user['first_name'], 'last_name': user['last_name']})
 
-        return res
+        return users_list
+        pprint(users_list)
 
     def get_photos(self, user_id):
         photos = self.api.method('photos.get',
