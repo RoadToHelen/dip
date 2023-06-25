@@ -21,6 +21,10 @@ class BotInterface:
                                'random_id': get_random_id()
                                }
                               )
+    def db(self, user_id):
+        create_db()
+        create_users()
+        select_users()
 
     def event_handler(self):
         longpoll = VkLongPoll(self.interface)
@@ -37,21 +41,21 @@ class BotInterface:
                     user = users.pop()
 
                     # здесь логика для проверки бд
-                    create_db()
-                    create_users()
-                    select_users()
-                    # checkes_users = check_users(user['id'])
-                    # check = {str(dating_list[0]) for user['id'] in checkes_users}
-                    # if not check:
-                    photos_user = self.api.get_photos(user['vk_id'])
+                    self.db(event.user_id)
+                    checkes_users = check_users(user['vk_id'])
+                    check = {str(user['vk_id']) for user['vk_id'] in checkes_users}
+                    if not check:
+                        photos_user = self.api.get_photos(user['vk_id'])
 
-                    self.message_send(event.user_id,
-                                      f'Встречайте -  {user["first_name"]} {user["last_name"]}',
-                                      photos_user
-                                      )
-                    # здесь логика для добавленяи в бд
-                    insert_users(user['vk_id'], user['first_name'],  user['last_name'])
-                    print(user['vk_id'], user['first_name'],  user['last_name'])
+                        self.message_send(event.user_id,
+                                          f'Встречайте -  {user["first_name"]} {user["last_name"]}',
+                                          photos_user
+                                          )
+                        # здесь логика для добавленяи в бд
+                        insert_users(user['vk_id'], user['first_name'],  user['last_name'])
+                        print(user['vk_id'], user['first_name'],  user['last_name'])
+                    else:
+                        print('Пользователь уже есть в БД')
 
                 elif command == 'пока':
                     self.message_send(event.user_id, f'До новых встреч!')
