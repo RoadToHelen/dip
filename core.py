@@ -1,6 +1,6 @@
 import vk_api
 from datetime import datetime
-from config import user_token
+from config import user_token, my_id
 from vk_api.exceptions import ApiError
 from datetime import datetime
 from pprint import pprint
@@ -20,13 +20,14 @@ class VkTools():
             info = {}
             print(f'error = {e}')
 
-        user_info = {'name': info['first_name'] + ' ' + info['last_name'],
-                     'id': info['id'],
-                     'bdate': info['bdate'] if 'bdate' in info else None,
-                     'home_town': info['home_town'],
-                     'sex': info['sex'],
-                     'city': info['city']['id']
+        user_info = {'name': info.get('first_name') + ' ' + info.get('last_name') if 'first_name' in info and 'last_name' in info else None,
+                     'id': info.get('id'),
+                     'bdate': info.get('bdate') if 'bdate' in info else None,
+                     'home_town': info.get('home_town') if 'home_town' in info else None,
+                     'sex': info.get('sex') if 'home_town' in info else None,
+                     'city': info.get('city')['id'] if info.get('city') is not None else None,
                      }
+
         return user_info
 
     def serch_users(self, params):
@@ -95,8 +96,8 @@ class VkTools():
         return ','.join(new_list)
 
 
-# if __name__ == '__main__':
-#     bot = VkTools(user_token)
-#     params = bot.get_profile_info(789657038)
-#     users = bot.serch_users(params)
-#     print(bot.get_photos(users[2]['id']))
+if __name__ == '__main__':
+    bot = VkTools(user_token)
+    params = bot.get_profile_info(my_id)
+    users = bot.serch_users(params)
+    print(bot.get_photos(users[2]['id']))
