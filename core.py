@@ -4,6 +4,8 @@ from config import user_token, my_id
 from vk_api.exceptions import ApiError
 from datetime import datetime
 from pprint import pprint
+# from vk_api.longpoll import VkLongPoll, VkEventType
+# from bot import BotInterface
 
 class VkTools():
     def __init__(self, user_token):
@@ -30,7 +32,7 @@ class VkTools():
 
         return user_info
 
-    def serch_users(self, params):
+    def serch_users(self, params, offset):
 
         sex = 1 if params['sex'] == 2 else 2
         city = params['city']
