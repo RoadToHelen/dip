@@ -4,8 +4,6 @@ from config import user_token, my_id
 from vk_api.exceptions import ApiError
 from datetime import datetime
 from pprint import pprint
-# from vk_api.longpoll import VkLongPoll, VkEventType
-# from bot import BotInterface
 
 class VkTools():
     def __init__(self, user_token):
