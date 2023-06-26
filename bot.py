@@ -28,33 +28,20 @@ class BotInterface:
         create_users()
         select_users()
 
-    def next_user(self, user_id):
-        # user_id = event.user_id
-        users = self.api.serch_users(self.params)
-        user = users.pop()
-        checkes_users = check_users(user['vk_id'])
-        check = {str(user['vk_id']) for user['vk_id'] in checkes_users}
-        if not check:
-            photos_user = self.api.get_photos(user['vk_id'])
-
-            self.message_send(user_id,
-                              f'Встречайте -  {user["first_name"]} {user["last_name"]}',
-                              photos_user
-                              )
-
-    # def hi(self, user_id):
-    #     self.params = self.api.get_profile_info(user_id)
-    #     self.message_send(user_id, f'Привет, {self.params["name"]}! Если хочешь подобрать пару - набери "поиск"')
-
-    # def search(self, user_id):
+    # def next_user(self, user_id):
+    #     # user_id = event.user_id
     #     users = self.api.serch_users(self.params)
     #     user = users.pop()
+    #     checkes_users = check_users(user['vk_id'])
+    #     check = {str(user['vk_id']) for user['vk_id'] in checkes_users}
+    #     if not check:
+    #         photos_user = self.api.get_photos(user['vk_id'])
+    #
+    #         self.message_send(user_id,
+    #                           f'Встречайте -  {user["first_name"]} {user["last_name"]}',
+    #                           photos_user
+    #                           )
 
-    # def check_params(self, user_id):
-    #     params = self.api.get_profile_info(user_id)
-    #     for i in params:
-    #         for 'name' == None:
-    #             name = self.message_send(user_id, f'Ваше имя: ')
 
     def event_handler(self):
         longpoll = VkLongPoll(self.interface)
@@ -79,7 +66,7 @@ class BotInterface:
                         if not check:
                             photos_user = self.api.get_photos(user['vk_id'])
                             self.message_send(event.user_id,
-                                              f'Встречайте -  {user["first_name"]} {user["last_name"]} ',
+                                              f'Встречайте -  {user["first_name"]} {user["last_name"]} ссылка: https://vk.com/id{user["vk_id"]}',
                                               photos_user
                                               )
                             insert_users(user['vk_id'], user['first_name'], user['last_name'])
@@ -98,7 +85,7 @@ class BotInterface:
                             photos_user = self.api.get_photos(user['vk_id'])
 
                             self.message_send(event.user_id,
-                                              f'Встречайте -  {user["first_name"]} {user["last_name"]} ссылка: vk.com/{user["vk_id"]}',
+                                              f'Встречайте -  {user["first_name"]} {user["last_name"]} ссылка: https://vk.com/id{user["vk_id"]}',
                                               photos_user
                                               )
 
