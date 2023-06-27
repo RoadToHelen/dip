@@ -24,24 +24,93 @@ class BotInterface:
                                }
                               )
     def db(self, user_id):
+        #drop_users
         create_db()
         create_users()
         select_users()
 
-    # def next_user(self, user_id):
-    #     # user_id = event.user_id
-    #     users = self.api.serch_users(self.params)
-    #     user = users.pop()
-    #     checkes_users = check_users(user['vk_id'])
-    #     check = {str(user['vk_id']) for user['vk_id'] in checkes_users}
-    #     if not check:
-    #         photos_user = self.api.get_photos(user['vk_id'])
-    #
-    #         self.message_send(user_id,
-    #                           f'Встречайте -  {user["first_name"]} {user["last_name"]}',
-    #                           photos_user
-    #                           )
+    def hi(self, user_id):
+        self.params = self.api.get_profile_info(user_id)
+        self.message_send(user_id,
+                          f'''Привет, {self.params["name"]}! Набери команду:
+                          поиск - начать поиск пары
+                          справка - вызов списка команд
+                          ''')
+        self.db(user_id)
 
+    def search_dating_user(self, user_id):
+        try:
+            self.message_send(user_id, f'{self.params["name"]}, идет поиск ...')
+        except KeyError as e:
+            users = []
+            print(f'error = {e}')
+            return self.message_send(user_id, 'Начни со слова привет')
+
+        if self.users:
+            user = self.users.pop()
+            checkes_users = check_users(user['vk_id'])
+            check = {str(user['vk_id']) for user['vk_id'] in checkes_users}
+            if not check:
+                photos_user = self.api.get_photos(user['vk_id'])
+                self.message_send(user_id,
+                                  f'Встречайте -  {user["first_name"]} {user["last_name"]}'
+                                  f'ссылка: https://vk.com/id{user["vk_id"]}'
+                                  f'написать https://vk.com/im?sel={user["vk_id"]}',
+                                  photos_user
+                                  )
+                insert_users(user['vk_id'], user['first_name'], user['last_name'])
+                print(user['vk_id'], user['first_name'], user['last_name'])
+
+        else:
+            self.users = self.api.serch_users(self.params, self.offset)
+            user = self.users.pop()
+            self.offset += 0
+
+            # проверка бд
+            checkes_users = check_users(user['vk_id'])
+            check = {str(user['vk_id']) for user['vk_id'] in checkes_users}
+            if not check:
+                photos_user = self.api.get_photos(user['vk_id'])
+
+                self.message_send(user_id,
+                                  f'Встречайте -  {user["first_name"]} {user["last_name"]} '
+                                  f'ссылка: https://vk.com/id{user["vk_id"]}'
+                                  f'написать https://vk.com/im?sel={user["vk_id"]}',
+                                  photos_user
+                                  )
+
+                # добавление в бд
+                insert_users(user['vk_id'], user['first_name'], user['last_name'])
+                print(user['vk_id'], user['first_name'], user['last_name'])
+            else:
+                print('User already in database')
+
+    def next(self, user_id):
+        self.search_dating_user(user_id)
+
+    def help(self, user_id):
+        self.message_send(user_id,
+                          f'''Список команд:
+                          справка - вызов списка команд
+                          поиск - начать поиск пары
+                          еще - показать следующую пару
+                          кто я - вызов информации о себе
+                          пока - завершить поиск
+                          ''')
+
+    def who(self, user_id):
+        try:
+            self.message_send(user_id, f'Твои данные: {self.params["name"]}')
+        except KeyError as e:
+            users = []
+            print(f'error = {e}')
+            return self.message_send(user_id, 'Начни со слова привет')
+
+    def bye(self, user_id):
+        self.message_send(user_id, f'Пока! До новых встреч!')
+
+    def unclear(self, user_id):
+        self.message_send(user_id, f'Твое сообщение не понятно, набери новое, пожалуйста.\n Например, справка')
 
     def event_handler(self):
         longpoll = VkLongPoll(self.interface)
@@ -49,56 +118,22 @@ class BotInterface:
         for event in longpoll.listen():
             if event.type == VkEventType.MESSAGE_NEW and event.to_me:
                 command = event.text.lower()
-                user_id = event.user_id
+                user_id = str(event.user_id)
 
                 if command == 'привет':
-                    self.params = self.api.get_profile_info(user_id)
-                    self.message_send(user_id,
-                                      f'Привет, {self.params["name"]}! Если хочешь подобрать пару - набери "поиск"')
+                    self.hi(user_id)
+                elif command == 'справка':
+                    self.help(user_id)
                 elif command == 'поиск':
-                    self.message_send(event.user_id, f'{self.params["name"]}, идет поиск ...')
-                    self.db(event.user_id)
-
-                    if self.users:
-                        user = self.users.pop()
-                        checkes_users = check_users(user['vk_id'])
-                        check = {str(user['vk_id']) for user['vk_id'] in checkes_users}
-                        if not check:
-                            photos_user = self.api.get_photos(user['vk_id'])
-                            self.message_send(event.user_id,
-                                              f'Встречайте -  {user["first_name"]} {user["last_name"]} ссылка: https://vk.com/id{user["vk_id"]}',
-                                              photos_user
-                                              )
-                            insert_users(user['vk_id'], user['first_name'], user['last_name'])
-                            print(user['vk_id'], user['first_name'], user['last_name'])
-
-
-                    else:
-                        self.users = self.api.serch_users(self.params, self.offset)
-                        user = self.users.pop()
-                        self.offset += 30
-
-                        # логика для проверки бд
-                        checkes_users = check_users(user['vk_id'])
-                        check = {str(user['vk_id']) for user['vk_id'] in checkes_users}
-                        if not check:
-                            photos_user = self.api.get_photos(user['vk_id'])
-
-                            self.message_send(event.user_id,
-                                              f'Встречайте -  {user["first_name"]} {user["last_name"]} ссылка: https://vk.com/id{user["vk_id"]}',
-                                              photos_user
-                                              )
-
-                            # здесь логика для добавленяи в бд
-                            insert_users(user['vk_id'], user['first_name'],  user['last_name'])
-                            print(user['vk_id'], user['first_name'],  user['last_name'])
-                        else:
-                            print('User already in database')
-
+                    self.search_dating_user(user_id)
+                elif command == 'кто я':
+                    self.who(user_id)
+                elif command == 'еще':
+                    self.next(user_id)
                 elif command == 'пока':
-                    self.message_send(event.user_id, f'До новых встреч!')
+                    self.bye(user_id)
                 else:
-                    self.message_send(event.user_id, f'Твое сообщение мне не понятно, набери новое, пожалуйста.')
+                    self.unclear(user_id)
 
 if __name__ == '__main__':
     bot = BotInterface(group_token, user_token)
