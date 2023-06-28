@@ -22,13 +22,14 @@ class VkTools():
 
         user_info = {'name': info.get('first_name') + ' ' + info.get('last_name') if 'first_name' in info and 'last_name' in info else None,
                      'id': info.get('id'),
-                     'bdate': info.get('bdate') if 'bdate' in info else None,
+                     'bdate': info.get('bdate') if 'bdate' in info and len(info.get('bdate').split('.')) == 3 else None,
                      'home_town': info.get('home_town') if 'home_town' in info else None,
                      'sex': info.get('sex') if 'home_town' in info else None,
                      'city': info.get('city')['id'] if info.get('city') is not None else None,
                      }
 
         return user_info
+
 
     def serch_users(self, params, offset):
 
@@ -70,7 +71,6 @@ class VkTools():
                 users_list.append({'vk_id': user['id'], 'first_name': user['first_name'], 'last_name': user['last_name']})
 
         return users_list
-        pprint(users_list)
 
     def get_photos(self, user_id):
         photos = self.api.method('photos.get',
