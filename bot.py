@@ -2,7 +2,8 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from random import randrange
 from vk_api.utils import get_random_id
-from database import create_db, create_users, select_users, insert_users, drop_users, check_users
+from database import DBTools
+# create_db, create_users, select_users, insert_users, drop_users, check_users
 from config import group_token, user_token
 from core import VkTools
 import pprint
@@ -13,7 +14,7 @@ class BotInterface:
     def __init__(self, group_token, user_token):
         self.interface = vk_api.VkApi(token=group_token)
         self.api = VkTools(user_token)
-        # self.db = DBTools
+        self.db = DBTools
         self.params = {}
         self.users = {}
         self.offset = 0
@@ -28,9 +29,9 @@ class BotInterface:
                               )
     def db(self, user_id):
         # self.db.drop_users
-        create_db()
-        create_users()
-        select_users()
+        self.db.ccreate_db()
+        self.db.ccreate_users()
+        self.db.cselect_users()
 
     def hi(self, user_id):
         self.params = self.api.get_profile_info(user_id)
@@ -51,7 +52,7 @@ class BotInterface:
 
         if self.users:
             user = self.users.pop()
-            checkes_users = check_users(user['vk_id'])
+            checkes_users = self.db.ccheck_users(user['vk_id'])
             check = {str(user['vk_id']) for user['vk_id'] in checkes_users}
             if not check:
                 photos_user = self.api.get_photos(user['vk_id'])
@@ -61,7 +62,7 @@ class BotInterface:
                                   f'написать https://vk.com/im?sel={user["vk_id"]}',
                                   photos_user
                                   )
-                insert_users(user['vk_id'], user['first_name'], user['last_name'])
+                self.db.cinsert_users(user['vk_id'], user['first_name'], user['last_name'])
                 print(user['vk_id'], user['first_name'], user['last_name'])
 
         else:
@@ -70,7 +71,7 @@ class BotInterface:
             self.offset += 0
 
             # проверка бд
-            checkes_users = check_users(user['vk_id'])
+            checkes_users = self.db.check_users(user['vk_id'])
             check = {str(user['vk_id']) for user['vk_id'] in checkes_users}
             if not check:
                 photos_user = self.api.get_photos(user['vk_id'])
@@ -83,7 +84,7 @@ class BotInterface:
                                   )
 
                 # добавление в бд
-                insert_users(user['vk_id'], user['first_name'], user['last_name'])
+                self.db.insert_users(user['vk_id'], user['first_name'], user['last_name'])
                 print(user['vk_id'], user['first_name'], user['last_name'])
             else:
                 print('User already in database')
