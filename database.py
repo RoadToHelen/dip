@@ -69,7 +69,14 @@ class DBTools():
 
     @staticmethod
     def check_users(duser_id):
-        # connection.autocommit = True
+        connection = psycopg2.connect(
+            database='neto',
+            user='postgres',
+            password='12345',
+            host='localhost',
+            port='5432'
+        )
+
         cursor = connection.cursor()
         cursor.execute(f'''SELECT vk_id FROM users WHERE vk_id ={duser_id};''')
         out = cursor.fetchall()
